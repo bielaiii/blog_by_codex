@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人博客</title>
+  <meta name="description" content="一个托管在 GitHub Pages 上的个人博客。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <p class="brand-eyebrow">White Archive</p>
+        <h1>把写作、分享与项目整理成一张个人看板</h1>
+      </div>
+      <nav class="tabs-wrap" aria-label="内容分类">
+        <div class="tabs">
+          <button class="tab is-active" type="button" data-tab="insights">个人见解</button>
+          <button class="tab" type="button" data-tab="articles">分享文章</button>
+          <button class="tab" type="button" data-tab="projects">项目</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="workspace">
+      <article class="content-panel glow-white">
+        <div id="article-empty" class="article-empty" hidden>
+          <h2>当前栏目还没有内容</h2>
+          <p>切换顶部 tab，或在 `posts/` 目录中新增 Markdown 文章。</p>
+        </div>
+
+        <section id="article-list-view" class="article-list-view">
+          <div class="section-intro">
+            <p class="section-kicker">Archive</p>
+            <h2 id="list-title">个人文章归档</h2>
+            <p id="list-description" class="section-copy">这里只显示标题和预览，点击卡片后进入完整文章。</p>
+          </div>
+          <div id="article-list" class="article-list" aria-live="polite"></div>
+        </section>
+
+        <section id="article-detail-view" class="article-detail-view" hidden>
+          <button id="back-button" class="back-button" type="button">返回归档列表</button>
+          <div class="content-meta">
+            <div class="content-meta-top">
+              <p id="article-category" class="article-category"></p>
+              <p id="article-date" class="article-date"></p>
+            </div>
+            <h2 id="article-title"></h2>
+            <p id="article-summary" class="article-summary"></p>
+            <div id="article-tags" class="article-tags"></div>
+          </div>
+          <div id="article-loading" class="article-loading" hidden>正在加载内容...</div>
+          <div id="article-content" class="markdown-body"></div>
+        </section>
+      </article>
+
+      <aside class="timeline-panel">
+        <div class="timeline-header">
+          <p>时间轴</p>
+          <h2 id="timeline-heading">个人见解</h2>
+        </div>
+        <div id="timeline" class="timeline" aria-live="polite"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
