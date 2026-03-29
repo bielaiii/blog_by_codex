@@ -146,6 +146,54 @@ button {
   background: transparent;
 }
 
+.workspace.is-reading-detail {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace.is-single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace.is-single-column .content-panel {
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.workspace.is-reading-detail .content-panel {
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 34px;
+}
+
+.workspace.is-reading-detail .article-detail-view {
+  position: relative;
+}
+
+.edge-back-button {
+  position: fixed;
+  left: calc(50% + 560px);
+  bottom: 28px;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(13, 107, 255, 0.98), rgba(0, 87, 245, 0.98));
+  color: #ffffff;
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 40;
+  box-shadow: 0 0 26px rgba(13, 107, 255, 0.22), 0 14px 28px rgba(13, 107, 255, 0.2);
+}
+
+.edge-back-button:hover {
+  transform: translateY(-1px);
+}
+
 .section-intro {
   display: flex;
   flex-direction: column;
@@ -530,6 +578,16 @@ button {
     position: static;
     padding-top: 0;
   }
+
+  .edge-back-button {
+    left: auto;
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .edge-back-button:hover {
+    transform: translateY(-1px);
+  }
 }
 
 @media (max-width: 820px) {
@@ -578,6 +636,15 @@ button {
     font-size: 2rem;
   }
 }
+
+
+
+
+
+
+
+
+
 
 
 

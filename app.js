@@ -63,6 +63,8 @@ let lastState = { tab: "resume", slug: "" };
 let pendingRestoreTab = "";
 
 const tabsEls = [...document.querySelectorAll(".tab")];
+const workspaceEl = document.querySelector(".workspace");
+const timelinePanelEl = document.querySelector(".timeline-panel");
 const timelineEl = document.querySelector("#timeline");
 const timelineHeadingEl = document.querySelector("#timeline-heading");
 const listTitleEl = document.querySelector("#list-title");
@@ -79,6 +81,7 @@ const articleSummaryEl = document.querySelector("#article-summary");
 const articleTagsEl = document.querySelector("#article-tags");
 const articleContentEl = document.querySelector("#article-content");
 const backButtonEl = document.querySelector("#back-button");
+const edgeBackButtonEl = document.querySelector("#edge-back-button");
 const contentMetaEl = document.querySelector(".content-meta");
 
 if ("scrollRestoration" in history) {
@@ -143,6 +146,20 @@ function renderTabs(currentTab) {
   tabsEls.forEach((tabEl) => {
     tabEl.classList.toggle("is-active", tabEl.dataset.tab === currentTab);
   });
+}
+
+function updateReadingLayout(tab, slug) {
+  const isReadingDetail = Boolean(slug) && tab !== "resume";
+  const showTimeline = tab === "articles" && !isReadingDetail;
+  const isSingleColumn = tab !== "articles";
+
+  workspaceEl.classList.toggle("is-reading-detail", isReadingDetail);
+  workspaceEl.classList.toggle("is-single-column", isSingleColumn);
+  timelinePanelEl.hidden = !showTimeline;
+
+  if (edgeBackButtonEl) {
+    edgeBackButtonEl.hidden = !isReadingDetail;
+  }
 }
 
 function renderList(currentTab, filteredPosts, currentSlug) {
@@ -220,7 +237,7 @@ async function loadArticle(post) {
   if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   articleContentEl.innerHTML = "";
   contentMetaEl.hidden = isResume;
-  backButtonEl.hidden = isResume;
+  backButtonEl.hidden = true;
 
   window.scrollTo({ top: 0, behavior: "auto" });
 
@@ -254,7 +271,7 @@ function showArchiveOnly(currentTab, filteredPosts) {
 
   renderList(currentTab, filteredPosts, "");
   articleDetailViewEl.hidden = true;
-  backButtonEl.hidden = false;
+  backButtonEl.hidden = true;
   contentMetaEl.hidden = false;
 
   if (pendingRestoreTab === currentTab) {
@@ -286,6 +303,7 @@ function syncView() {
 
   renderTabs(tab);
   renderTimeline(tab, timelineFocusSlug);
+  updateReadingLayout(tab, slug);
 
   if (!filteredPosts.length) {
     showArchiveOnly(tab, filteredPosts);
@@ -343,8 +361,22 @@ backButtonEl.addEventListener("click", () => {
   setHash(tab);
 });
 
+if (edgeBackButtonEl) {
+  edgeBackButtonEl.addEventListener("click", () => {
+    const { tab } = getStateFromHash();
+    setHash(tab);
+  });
+}
+
 window.addEventListener("hashchange", syncView);
 syncView();
+
+
+
+
+
+
+
 
 
 
