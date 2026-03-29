@@ -1,19 +1,28 @@
 const tabs = {
-  insights: "个人见解",
+  resume: "个人简历",
   articles: "分享文章",
   projects: "项目"
 };
 
 const tabDescriptions = {
-  insights: "记录个人判断、观察和复盘，默认归档到你的个人文章区。",
+  resume: "这里是你的个人简历入口。建议从现有 LaTeX 简历同步内容与版式。",
   articles: "更偏向分享型内容，可以是教程、摘录、整理和技术文章。",
   projects: "适合持续更新中的项目记录、状态变化和阶段性总结。"
 };
 
 const posts = [
   {
+    slug: "resume-profile",
+    tab: "resume",
+    title: "个人简历（Web 版本）",
+    date: "2026-03-29",
+    summary: "该页面用于承载你的在线简历内容。当前为占位版本，后续会按你的 LaTeX 简历逐段迁移并对齐布局。",
+    tags: ["Resume", "LaTeX", "Profile"],
+    file: "posts/resume-profile.md"
+  },
+  {
     slug: "first-post",
-    tab: "insights",
+    tab: "articles",
     title: "把个人博客搭成一个长期写作入口",
     date: "2026-03-28",
     summary: "从结构、样式和部署方式出发，建立一个能长期维护的静态博客。文章归档页先显示标题和预览，点进去再阅读完整内容。",
@@ -22,7 +31,7 @@ const posts = [
   },
   {
     slug: "writing-workflow",
-    tab: "insights",
+    tab: "articles",
     title: "给持续写作保留一点轻量流程",
     date: "2026-03-12",
     summary: "文章越容易落地，博客越容易持续更新。流程轻一点，内容反而更稳定，也更适合放进个人文章归档。",
@@ -50,7 +59,7 @@ const posts = [
 ].sort((a, b) => b.date.localeCompare(a.date));
 
 const listScrollPositions = Object.fromEntries(Object.keys(tabs).map((tab) => [tab, 0]));
-let lastState = { tab: "insights", slug: "" };
+let lastState = { tab: "resume", slug: "" };
 let pendingRestoreTab = "";
 
 const tabsEls = [...document.querySelectorAll(".tab")];
@@ -94,10 +103,10 @@ function formatDate(dateString) {
 function getStateFromHash() {
   const hash = window.location.hash.replace(/^#/, "").trim();
   const params = new URLSearchParams(hash);
-  const tab = params.get("tab") || "insights";
+  const tab = params.get("tab") || "resume";
   const slug = params.get("post") || "";
   return {
-    tab: tabs[tab] ? tab : "insights",
+    tab: tabs[tab] ? tab : "resume",
     slug
   };
 }
