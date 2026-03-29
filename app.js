@@ -5,7 +5,7 @@ const tabs = {
 };
 
 const tabDescriptions = {
-  resume: "这里是你的个人简历入口。建议从现有 LaTeX 简历同步内容与版式。",
+  resume: "",
   articles: "更偏向分享型内容，可以是教程、摘录、整理和技术文章。",
   projects: "适合持续更新中的项目记录、状态变化和阶段性总结。"
 };
@@ -14,10 +14,10 @@ const posts = [
   {
     slug: "resume-profile",
     tab: "resume",
-    title: "个人简历（Web 版本）",
+    title: "个人简历",
     date: "2026-03-29",
-    summary: "该页面用于承载你的在线简历内容。当前为占位版本，后续会按你的 LaTeX 简历逐段迁移并对齐布局。",
-    tags: ["Resume", "LaTeX", "Profile"],
+    summary: "",
+    tags: [],
     file: "posts/resume-profile.md"
   },
   {
@@ -79,6 +79,7 @@ const articleSummaryEl = document.querySelector("#article-summary");
 const articleTagsEl = document.querySelector("#article-tags");
 const articleContentEl = document.querySelector("#article-content");
 const backButtonEl = document.querySelector("#back-button");
+const contentMetaEl = document.querySelector(".content-meta");
 
 if ("scrollRestoration" in history) {
   history.scrollRestoration = "manual";
@@ -150,13 +151,13 @@ function renderList(currentTab, filteredPosts, currentSlug) {
 
   if (!filteredPosts.length) {
     articleListEl.innerHTML = "";
-    articleEmptyEl.hidden = false;
+    if (articleEmptyEl) { articleEmptyEl.hidden = false; }
     articleListViewEl.hidden = true;
     articleDetailViewEl.hidden = true;
     return;
   }
 
-  articleEmptyEl.hidden = true;
+  if (articleEmptyEl) { articleEmptyEl.hidden = true; }
   articleListViewEl.hidden = false;
 
   articleListEl.innerHTML = filteredPosts
@@ -213,8 +214,14 @@ function renderArticleMeta(post) {
 async function loadArticle(post) {
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = false;
-  articleLoadingEl.hidden = false;
+  if (articleEmptyEl) { articleEmptyEl.hidden = true; }
+
+  const isResume = post.tab === "resume";
+  if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   articleContentEl.innerHTML = "";
+  contentMetaEl.hidden = isResume;
+  backButtonEl.hidden = isResume;
+
   window.scrollTo({ top: 0, behavior: "auto" });
 
   try {
@@ -227,9 +234,9 @@ async function loadArticle(post) {
     renderArticleMeta(post);
     articleContentEl.innerHTML = marked.parse(markdown);
     articleContentEl.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
-    articleLoadingEl.hidden = true;
+    if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   } catch (error) {
-    articleLoadingEl.hidden = true;
+    if (articleLoadingEl) { articleLoadingEl.hidden = true; }
     articleContentEl.innerHTML = `
       <div class="detail-error">
         <h3>内容加载失败</h3>
@@ -241,8 +248,15 @@ async function loadArticle(post) {
 }
 
 function showArchiveOnly(currentTab, filteredPosts) {
+  if (currentTab === "resume") {
+    return;
+  }
+
   renderList(currentTab, filteredPosts, "");
   articleDetailViewEl.hidden = true;
+  backButtonEl.hidden = false;
+  contentMetaEl.hidden = false;
+
   if (pendingRestoreTab === currentTab) {
     restoreListScroll(currentTab);
     pendingRestoreTab = "";
@@ -253,6 +267,10 @@ function syncView() {
   const currentState = getStateFromHash();
   const { tab, slug } = currentState;
   const filteredPosts = getPostsByTab(tab);
+
+  if (tab === "resume") {
+    if (articleEmptyEl) { articleEmptyEl.hidden = true; }
+  }
   const activePost = filteredPosts.find((post) => post.slug === slug);
   const timelineFocusSlug = activePost?.slug || filteredPosts[0]?.slug || "";
 
@@ -275,6 +293,11 @@ function syncView() {
     return;
   }
 
+  if (tab === "resume" && !slug) {
+    setHash(tab, filteredPosts[0].slug);
+    return;
+  }
+
   if (!slug) {
     showArchiveOnly(tab, filteredPosts);
     lastState = currentState;
@@ -286,7 +309,10 @@ function syncView() {
     return;
   }
 
-  renderList(tab, filteredPosts, activePost.slug);
+  if (tab !== "resume") {
+    renderList(tab, filteredPosts, activePost.slug);
+  }
+
   loadArticle(activePost);
   lastState = currentState;
 }
@@ -295,9 +321,19 @@ tabsEls.forEach((tabEl) => {
   tabEl.addEventListener("click", () => {
     const nextTab = tabEl.dataset.tab;
     const currentState = getStateFromHash();
+
     if (!currentState.slug) {
       rememberListScroll(currentState.tab);
     }
+
+    if (nextTab === "resume") {
+      const resumePost = getPostsByTab("resume")[0];
+      if (resumePost) {
+        setHash("resume", resumePost.slug);
+        return;
+      }
+    }
+
     setHash(nextTab);
   });
 });
@@ -309,3 +345,6 @@ backButtonEl.addEventListener("click", () => {
 
 window.addEventListener("hashchange", syncView);
 syncView();
+
+
+

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260329-5">
 </head>
 <body>
   <div class="page-shell">
@@ -29,10 +29,12 @@
 
     <main class="workspace">
       <article class="content-panel glow-white">
+        <!--
         <div id="article-empty" class="article-empty" hidden>
           <h2>当前栏目还没有内容</h2>
           <p>切换顶部 tab，或在 `posts/` 目录中新增 Markdown 文章。</p>
         </div>
+        -->
 
         <section id="article-list-view" class="article-list-view">
           <div class="section-intro">
@@ -54,7 +56,7 @@
             <p id="article-summary" class="article-summary"></p>
             <div id="article-tags" class="article-tags"></div>
           </div>
-          <div id="article-loading" class="article-loading" hidden>正在加载内容...</div>
+          <div id="article-loading" class="article-loading" hidden></div>
           <div id="article-content" class="markdown-body"></div>
         </section>
       </article>
@@ -71,7 +73,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-  <script src="app.js" type="module"></script>
+  <script src="app.js?v=20260329-5" type="module"></script>
 </body>
 </html>
+
 

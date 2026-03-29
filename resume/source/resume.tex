@@ -1,0 +1,371 @@
+%-------------------------
+%-------------------------
+% Rezume, a latex resume template for developers
+% Author : Nanu Panchamurthy
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+
+% Hope this resume template helps you land an awesome job. If you found this helpful, please consider starring the github repo here, .
+%-------------------------
+
+
+
+%------------PACKAGES----------------
+\documentclass[a4paper]{article}
+
+\usepackage{verbatim} % reimplements the "verbatim" and "verbatim*" environments
+
+\usepackage{titlesec} % provides an interface to sectioning commands i.e. custom elements
+
+\usepackage{color} % provides both foreground and background color management
+
+\usepackage{enumitem} % provides control over enumerate, itemize and description
+
+\usepackage{fancyhdr} % provides extensive facilities for constructing headers, footers and also controlling their use
+
+\usepackage{tabularx} % defines an environment tabularx, extension of "tabular" with an extra designator x, paragraph like column whose width automatically expands to fill the width of the environment
+
+\usepackage{latexsym} % provides mathematical symbols
+
+\usepackage{times} % provides martin vogel's symbol font which contains various symbols
+
+\usepackage[empty]{fullpage} % sets margins to one inch and removes headers, footers etc..
+
+\usepackage[hidelinks]{hyperref} % removes color and shadow of hyperlinks
+
+\usepackage[normalem]{ulem} % provides "\ul" (uline) command which will break at line breaks
+
+\usepackage[english]{babel} % provides culturally determined typographical rules for wide range of languages
+\usepackage[UTF8]{ctex}
+\usepackage{siunitx}
+\usepackage{relsize}
+\usepackage{xspace}
+%-----------------------------------------
+%\linespread = 
+%\input glyphtounicode % converts glyph names to unicode
+%\pdfgentounicode=1 % ensures pdfs generated are ats readable
+
+%----------FONT OPTIONS-------------------
+\usepackage[default]{} % uses the font source sans pro
+\urlstyle{same} % changes url font from default urlfont to font being used by the document
+%-----------------------------------------
+
+
+%----------MARGIN OPTIONS-----------------
+\pagestyle{fancy} % set page style to one configured by fancyhdr
+\fancyhf{} % clear all header and footer fields
+
+\renewcommand{\headrulewidth}{0in} % sets thickness of linerule under header to zero
+\renewcommand{\footrulewidth}{0in} % sets thickness of linerule over footer to zero
+
+\setlength{\tabcolsep}{0in} % sets thickness of column separator in tables to zero
+
+% origin of the document is one inch from the top and from and the left
+% oddsidemargin and evensidemargin both refer to the left margin
+% right margin is indirectly set using oddsidemargin
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\topmargin}{-0.5in}
+
+\addtolength{\textwidth}{1.0in} % sets width of text area in the page to one inch
+\addtolength{\textheight}{1.0in} % sets height of text area in the page to one inch
+
+\raggedbottom{} % makes all pages the height of current page, no extra vertical space added
+\raggedright{} % makes all pages the width of current page, no extra horizontal space added
+%------------------------------------------
+
+
+%--------SECTIONING COMMANDS---------
+% \titleformat{<command>}
+%   [<shape>]{<format>}{<label>}{<sep>}
+%     {<before-code>}[<after-code>]
+
+% command is the sectioning command to be redefined
+% shape is the style of the font; scshape stands for small caps style
+% format is the format to be applied to whole title- label and text; absent here
+% label defines the label
+% sep is the horizontal separation between label and title body
+% before-code is the code to be executed before
+% after-code is the code to be executed after
+
+\titleformat{\section}
+  {\scshape\large}{}
+    {0em}{\color{black}}[\color{black}\titlerule\vspace{0pt}]
+%-------------------------------------
+
+
+%--------REDEFINITIONS----------------
+% redefines the style of the bullet point
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+% redefines the underline depth to 2pt
+\renewcommand{\ULdepth}{2pt}
+%-------------------------------------
+
+
+%--------CUSTOM COMMANDS--------------
+%\vspace{} defines a vertical space of given size, modifying this in custom commands can help stretch or shrink resume to remove or add content
+
+% resumeItem renders a bullet point
+\newcommand{\resumeItem}[1]{
+  \item\small{#1}
+}
+
+
+
+% commands to start and end itemization of resumeItem, rightmargin set to 0.11in to avoid the overflow of resumetItem beyond whatever resumeItemHeading is being used
+\newcommand{\resumeItemListStart}{\begin{itemize}[rightmargin=0.11in]}
+\newcommand{\resumeItemListEnd}{\end{itemize}}
+
+% resumeSectionType renders a bolded type to be used under a section, used as skill type here, middle element is used to keep ":"s in the same vertical line
+\newcommand{\resumeSectionType}[3]{
+  \item\begin{tabular*}{0.96\textwidth}[t]{
+    p{0.15\linewidth}p{0.02\linewidth}p{0.81\linewidth}
+  }
+    \textbf{#1} & #2 & #3
+  \end{tabular*}\vspace{-2pt}
+}
+
+% resumeTrioHeading renders three elements in three columns with second element being italicized and first element bolded, can be used for projects with three elements
+\newcommand{\resumeTrioHeading}[3]{
+  \item\small{
+    \begin{tabular*}{0.96\textwidth}[t]{
+      l@{\extracolsep{\fill}}c@{\extracolsep{\fill}}r
+    }
+      \textbf{#1} & \textit{#2} & #3
+    \end{tabular*}
+  }
+}
+
+% resumeQuadHeading renders four elements in a two columns with the second row being italicized and first element of first row bolded, can be used for experience and projects with four elements
+\newcommand{\resumeQuadHeading}[4]{
+  \item
+  \begin{tabular*}{0.96\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small#3} & \textit{\small #4} \\
+  \end{tabular*}
+}
+
+% resumeQuadHeading renders four elements in a two columns with the second row being italicized and first element of first row bolded, can be used for experience and projects with four elements
+\newcommand{\resumeQuadHeadingVar}[4]{
+  \item
+  \begin{tabular*}{0.96\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\normalsize#3} & \textit{\normalsize #4} \\
+    \vspace{0.1cm}
+  \end{tabular*}
+}
+
+% resumeQuadHeadingChild renders the second row of resumeQuadHeading, can be used for experience if different roles in the same company need to added
+\newcommand{\resumeQuadHeadingChild}[2]{
+  \item
+  \begin{tabular*}{0.96\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{\small#1} & {\small#2} \\
+  \end{tabular*}
+}
+
+% commands to start and end itemization of resumeQuadHeading, lefmargin for left indent of 0.15in for resumeItems
+\newcommand{\resumeHeadingListStart}{
+  \begin{itemize}[leftmargin=0.15in, label={}]
+}
+\newcommand{\resumeHeadingListEnd}{\end{itemize}}
+%-------------------------------------------
+\newcommand{\resumeIndentedItemListStart}{\begin{itemize}[leftmargin=0.25in, rightmargin=0.11in]}
+\newcommand{\resumeIndentedItemListEnd}{\end{itemize}}
+
+
+\newcommand{\Rplus}{\protect\hspace{-.1em}\protect\raisebox{.35ex}{\smaller{\smaller\textbf{+}}}}
+\newcommand{\Cpp}{\mbox{C\Rplus\Rplus}\xspace}
+
+%__________________RESUME____________________
+% You can rearrange sections in any order you may prefer
+\begin{document}
+
+%-----------CONTACT DETAILS------------------
+% Make sure all the details are correct, you can add more links in the first row of second column if needed
+
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{\Huge 陈翔 \vspace{2pt}} & % row = 1, col = 1
+  %Location: Anycity, Anystate, Anycountry \\ % row = 1, col = 2
+  %\href{https://jane-doe.com}{\uline{jane-doe.com}} $|$ % row = 2, col = 1
+  %\href{https://linkedin.com/in/jane-doe}{\uline{LinkedIn}} $|$ % row = 2, col = 1
+  %\href{https://github.com/jane-doe}{\uline{GitHub}} $|$ % row = 2, col = 1
+  %\href{https://leetcode.com/jane-doe}{\uline{Leetcode}} & % row = 2, col = 1
+  Email: \href{mailto:aminoyls@outlook.com}{\uline{aminoyls@outlook.com}} $|$ % row = 2, col = 2
+  Mobile: +86 19520949063 \\ % row = 2, col = 2
+\end{tabular*}
+%--------------------------------------------
+
+
+%-----------SUMMARY--------------------------
+% Keep this short, simple and straigth to point
+%{
+%\section{Full Stack Developer}
+%\small{
+%  I am a highly skilled web developer with over \textbf{3 years of experience} in \textbf{HTML, CSS, JavaScript, and PHP}. I have knowledge of popular frameworks such as \textbf{React, Angular, and Vue.js} and experience with REST APIs and MVC frameworks.
+%}
+%}
+%--------------------------------------------
+
+%-----------EDUCATION-------------------------
+% Mention your CGPA, if its good, in the first row of second column
+\section{\LARGE 教育}
+  \resumeHeadingListStart{}
+    %\resumeTrioHeading{University of Colorado Boulder - College of Arts and Sciences}{ }
+    %{Bachelor of Arts in Computer Science}{Aug 2018 -- May 2022}
+    %{Major GPA}{3.0/4.0}
+    %{Computer Science GPA}{3.0}
+    %\resumeTrioHeading{}{}{}
+   %\resumeQuadHeading{a}{b}
+   \resumeTrioHeading{\large 科罗拉多大学博尔德分校}
+   {}{}
+   \resumeTrioHeading{计算机科学本科}{}{2018.8 -- 2022.5}
+  % \resumeQuadHeading{Computer Science GPA}{3.0}{}{}
+   %\resumeItem{Computer Science GPA}{3.0}
+   %\resumeItem{\large Relative Courses}
+   %\resumeItemListStart{}
+   %data structure, algorithm, machine learning, artificial intelligence, Linux, network system, database system, Object-oriented programming, UI/UX design, web design
+   %\resumeItemListEnd{}
+  \resumeHeadingListEnd{}
+%---------------------------------------------
+
+\vspace{0.8cm} % 教育和工作经历之间插入空行
+
+%-----------EXPERIENCE-----------------------
+% Distill all your talking points to small bullet points which follow the pattern "challenge-action-result" for maximum efficiency. Try to quantify (use numbers) your points whenver possible, highlist words of importance
+
+\section{\LARGE 工作经历}
+%\vspace{0.8cm}
+\resumeHeadingListStart{}
+
+
+  \resumeQuadHeadingVar{\large 软件开发工程师}{2023.1 -- 2025.4}
+  %{Contractor, Huawei Technologies via Career International }{深圳}
+  {科锐国际, 华为od}{深圳}
+  % \vspace{0.2cm} {}
+主要工作内容
+ \resumeItemListStart{}
+ 
+ \resumeItem{基于场景特征设计分类与决策策略，提升识别准确率，减少错误策略触发对系统稳定性的影响。}
+ \resumeItem{优化手势识别算法，在资源受限的嵌入式环境下提升识别效率和准确度。}
+ \resumeItem{为算法模块新特性新功能设计方案，开发以及维护。}
+ \resumeItem{跨部门合作，按时完成版本交付，功能测试以及适配新接口新改动。}
+ 
+ 
+ \resumeItemListEnd{}
+ 工作成就
+ \resumeItemListStart{}
+ \resumeItem{负责核心计算模块优化，整体性能提升 \SI{50}{\percent} - \SI{80}{\percent}，显著降低系统延迟。}
+\resumeItem{设计跨模块数据上报协议：定义数据结构及解析规则，支持任意长度扩展，提升系统可扩展性与跨部门对接效率。}
+\resumeItem{在交付环节引入 编译期校验机制（\Cpp 模板元编程），提前发现潜在结构体定义问题，保障系统健壮性。}
+\resumeItem{独立推动需求拆解与落地，跨部门协作完成数据上报功能从方案设计到最终上线。}
+\resumeItem{优化数据存储与内存占用，在保留完整数据的前提下，空间占用减少 \SI{50}{\percent}。}
+\resumeItem{在算法与系统优化方面积累了丰富经验，并能迁移到后端场景中的 高性能计算、协议设计、系统可靠性保障。}
+\resumeItem{具备跨团队沟通与全流程交付能力，能够快速开发迭代新需求。}
+\resumeItemListEnd{}
+
+
+
+%主要工作内容
+%负责核心计算模块优化，整体性能提升 50–80%，显著降低系统延迟。
+%基于场景特征设计分类与决策策略，提升算法识别准确率，减少错误策略触发对系统稳定性的影响。
+%优化数据存储与内存占用，在保留完整数据的前提下，空间占用减少 50%。
+%设计并实现跨模块数据上报协议：定义数据结构及解析规则，支持任意长度扩展，确保系统可扩展性与跨部门对接效率。
+%在交付环节引入 编译期校验机制（C++ 模板元编程），提前发现潜在结构体定义问题，提升系统可靠性。
+%工作成就
+%在算法与系统优化方面积累了经验，并能迁移到后端场景中的 高性能计算、协议设计、系统可靠性保障。
+%具备跨团队沟通与全流程交付能力，能够快速适应后端业务需求。
+
+  %\resumeQuadHeading{AT\&T Summer Learning Academy}{July 2020 -- Aug 2020}{AT\&T Inc.}%{Remote}
+  %  \resumeItemListStart{}
+  %    \resumeItem{\normalsize Dive into the values of AT\&T }
+  %    \resumeItem{\normalsize Find out the importance for teamwork in a company}
+  %    \resumeItem{\normalsize Understand the way of making clear charts to audience}
+  %  \resumeItemListEnd{}
+    
+\resumeHeadingListEnd{}
+%---------------------------------------------
+
+%-----------PROJECTS--------------------------
+% Use resumeQuadHeading if four elements are feasible (ex: demo video link), else use resumeTrioHeading. Keep the bullet points simple and concise and try to cover wide variety of skills you have used to build these projects
+
+%\section{\LARGE Projects}
+%  \resumeHeadingListStart{}
+%    \resumeTrioHeading{\large Yield Predictor}{}{April 2022 - May 2022}
+%      \resumeItemListStart{}
+%        \resumeItem{\normalsize Train a model to predict the agricultural production}
+%        \resumeItem{\normalsize Using tensorflow to improve the accuracy of decision tree model}
+%        \resumeItem{\normalsize Self adapt to environment when basic information is not provided}
+%        %\resumeItem{Deployed on GitHub pages via GitHub Actions}
+%      \resumeItemListEnd{}
+%    \resumeTrioHeading{\large Plane Shooting Game}{}{Sep 2021 - Dec 20219}
+%      \resumeItemListStart{}
+%        \resumeItem{\normalsize Design and developed a clean and working UI QT6}
+%        \resumeItem{\normalsize Enable plays to move and shoot through mousepad}
+%        \resumeItem{\normalsize Using C++ to solve the problem of collision between bullets objects and enemy planes}
+%        %\resumeItem{Deployed on GitHub pages via GitHub Actions}
+%      \resumeItemListEnd{}
+%
+%      \resumeTrioHeading{\large Review Management}{}{July 2021 - Aug 2021}
+%      \resumeItemListStart{}
+%        \resumeItem{\normalsize Auto manage review tasks based on exam time, workload and priority}
+%        \resumeItem{\normalsize Auto adjust different timezone to target time zone}
+%        \resumeItem{\normalsize Sync through multiple platforms by .ics file with zero cost}
+%      \resumeItemListEnd{}
+%  \resumeHeadingListEnd{}
+%--------------------------------------------
+%--------------SKILLS------------------------
+% Add or remove resumeSectionTypes according to your needs
+%\vspace{0.8cm} % 工作经历和技能之间插入空行
+\newcommand{\resumeSectionTypeMultiline}[3]{
+  \item
+  \begin{tabular*}{0.96\textwidth}[t]{p{0.15\linewidth}p{0.02\linewidth}p{0.81\linewidth}}
+    \textbf{#1} & #2 & \\
+  \end{tabular*}
+  \begin{tabular*}{0.96\textwidth}[t]{p{0.15\linewidth}p{0.02\linewidth}p{0.81\linewidth}}
+    & & #3 \\
+  \end{tabular*}\vspace{-2pt}
+}
+
+
+
+\section{\LARGE 技能}
+  \resumeHeadingListStart{}
+  %  \resumeSectionType{编程语言}{:}{C/C++, Python}
+  %  \resumeSectionType{网络编程}{:}{熟悉TCP/UDP的socket编程}
+  %  \resumeSectionType{多线程编程}{:}{了解多线程，协程}
+  %  \resumeSectionType{常用环境}{:}{熟悉Linux及常用命令}
+  %  \resumeSectionType{开发工具}{:}{Git, Vim, CMake}
+
+  %\resumeSectionTypeMultiline{编程语言}{}{\Cpp, C, Python, 熟悉STL, 模板，元编程}
+  %\resumeSectionTypeMultiline{网络编程}{}{熟悉Linux环境的socket编程, TCP/UDP协议}
+  %\resumeSectionTypeMultiline{并发与异步编程}{}{多线程，协程, Linux 非阻塞IO, 异步}
+  %\resumeSectionTypeMultiline{常用环境}{}{熟悉Linux及常用命令}
+  %\resumeSectionTypeMultiline{开发工具}{}{Git, CMake, Vim}
+
+
+    \resumeSectionTypeMultiline{编程语言}{}{熟悉C, \Cpp, python，熟悉 STL、模板与元编程}
+    \resumeSectionTypeMultiline{网络编程}{}{熟悉 Linux 环境下的 socket 编程，具备 TCP/UDP 协议开发经验, 熟悉 Redis 基本数据结构与常用 API}
+    \resumeSectionTypeMultiline{并发与异步}{}{熟悉多线程、协程、Linux 非阻塞 IO，具备异步编程经验}
+    %\resumeSectionTypeMultiline{并发与网络}{}{了解多线程与异步编程；熟悉 Redis 基本数据结构与常用 API，用于缓存与状态同步；具备基础的 TCP/UDP 网络编程经验}
+
+    \resumeSectionTypeMultiline{系统与环境}{}{熟悉 Linux 操作系统及常用命令，了解性能调优与内存管理}
+    \resumeSectionTypeMultiline{开发工具}{}{熟练使用 Git、CMake、Gdb、Valgrind}
+    \resumeSectionTypeMultiline{调试与优化}{}{熟练使用 gdb 进行 Linux C/C++ 程序调试，能配合 core dump 定位内存越界、段错误等问题；了解 Valgrind，能进行内存泄漏检测和性能分析}
+    %\resumeSectionType{Frameworks}{:}{React.js, Angular, Express, Node.js}
+    %\resumeSectionType{Libraries}{:}{Material, Redux, React Router}
+    %\resumeSectionType{Databases}{:}{MongoDB, PostgreSQL, MySQL}
+    %\resumeSectionType{Language}{:}{Mandarin, Cantonese, English, Korean}
+
+    %\resumeSectionType{Dev Tools}{:}{Visual Studio Code, Git, Gitlab}
+  \resumeHeadingListEnd{}
+%--------------------------------------------
+
+
+%----------------OTHERS----------------------
+% You can add your acheivements, accolades, certifications etc. here.
+
+
+%--------------------------------------------
+
+\end{document}
