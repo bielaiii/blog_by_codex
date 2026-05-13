@@ -9,18 +9,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260329-6">
+  <link rel="stylesheet" href="styles.css?v=20260514-16">
 </head>
 <body>
   <div class="page-shell">
     <header class="topbar">
+      <a class="home-button" href="#" aria-label="返回欢迎页">
+        <svg class="home-button-icon" aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M4 11.4 12 4l8 7.4"></path>
+          <path d="M6.5 10.3v8.2A1.5 1.5 0 0 0 8 20h8a1.5 1.5 0 0 0 1.5-1.5v-8.2"></path>
+          <path d="M10 20v-5.5h4V20"></path>
+        </svg>
+      </a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换深色模式" aria-pressed="false">
+        <svg class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M20 14.3A7.8 7.8 0 0 1 9.7 4a8.5 8.5 0 1 0 10.3 10.3Z"></path>
+        </svg>
+        <svg class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.8v2.1M12 19.1v2.1M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M2.8 12h2.1M19.1 12h2.1M4.9 19.1l1.5-1.5M17.6 6.4l1.5-1.5"></path>
+        </svg>
+      </button>
       <div class="brand-block">
         <p class="brand-eyebrow">White Archive</p>
         <h1>把写作、分享与项目整理成一张个人看板</h1>
       </div>
       <nav class="tabs-wrap" aria-label="内容分类">
         <div class="tabs">
-          <button class="tab is-active" type="button" data-tab="resume">个人简历</button>
+          <button class="tab" type="button" data-tab="resume">个人简历</button>
           <button class="tab" type="button" data-tab="articles">分享文章</button>
           <button class="tab" type="button" data-tab="projects">项目</button>
         </div>
@@ -36,7 +52,30 @@
         </div>
         -->
 
-        <section id="article-list-view" class="article-list-view">
+        <section id="welcome-view" class="welcome-view">
+          <p class="section-kicker">Welcome</p>
+          <h2>你好，这里是一座慢慢生长的个人档案馆。</h2>
+          <p>我把简历、文章和项目放在同一个入口里，让它们彼此保留距离，也能在需要时互相照亮。</p>
+          <div class="welcome-grid">
+            <a class="welcome-card" href="#tab=resume">
+              <span>个人简历</span>
+              <strong>经历、能力与阶段性轨迹</strong>
+            </a>
+            <a class="welcome-card" href="#tab=articles">
+              <span>分享文章</span>
+              <strong>写作、技术与思考记录</strong>
+            </a>
+            <a class="welcome-card" href="#tab=projects">
+              <span>项目</span>
+              <strong>正在打磨的想法和作品</strong>
+            </a>
+          </div>
+          <div class="skill-diamond-wrap" aria-label="技能云">
+            <div id="skill-diamond" class="skill-diamond"></div>
+          </div>
+        </section>
+
+        <section id="article-list-view" class="article-list-view" hidden>
           <div class="section-intro">
             <p class="section-kicker">Archive</p>
             <h2 id="list-title">个人简历归档</h2>
@@ -74,12 +113,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-  <script src="app.js?v=20260329-6" type="module"></script>
+  <script src="app.js?v=20260514-12" type="module"></script>
 </body>
 </html>
-
-
-
-
-
-

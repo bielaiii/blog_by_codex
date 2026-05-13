@@ -1,0 +1,33 @@
+{
+  "weightRange": {
+    "min": 1,
+    "max": 10,
+    "note": "weight 越大越靠近菱形中心、字体越大；1-3 小字体，4-7 过渡字体，8-10 大字体。"
+  },
+  "skills": [
+    { "label": "C++", "weight": 10 },
+    { "label": "Linux", "weight": 9 },
+    { "label": "Python", "weight": 8 },
+    { "label": "C", "weight": 7 },
+    { "label": "socket", "weight": 7 },
+    { "label": "TCP/UDP", "weight": 7 },
+    { "label": "多线程", "weight": 6 },
+    { "label": "异步编程", "weight": 6 },
+    { "label": "协程", "weight": 5 },
+    { "label": "Redis", "weight": 5 },
+    { "label": "STL", "weight": 5 },
+    { "label": "模板", "weight": 4 },
+    { "label": "元编程", "weight": 4 },
+    { "label": "非阻塞 IO", "weight": 4 },
+    { "label": "API", "weight": 4 },
+    { "label": "Git", "weight": 3 },
+    { "label": "CMake", "weight": 3 },
+    { "label": "GDB", "weight": 3 },
+    { "label": "Valgrind", "weight": 3 },
+    { "label": "core dump", "weight": 2 },
+    { "label": "内存越界", "weight": 2 },
+    { "label": "段错误", "weight": 2 },
+    { "label": "内存泄漏", "weight": 2 },
+    { "label": "性能分析", "weight": 2 }
+  ]
+}
