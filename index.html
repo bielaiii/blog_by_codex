@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260514-16">
+  <link rel="stylesheet" href="styles.css?v=20260611-6">
 </head>
 <body>
   <div class="page-shell">
@@ -70,6 +70,25 @@
               <strong>正在打磨的想法和作品</strong>
             </a>
           </div>
+          <section class="activity-section" aria-labelledby="activity-heading">
+            <div class="activity-header">
+              <div>
+                <p class="section-kicker">Updates</p>
+                <h3 id="activity-heading">文章与项目更新</h3>
+              </div>
+              <div id="activity-summary" class="activity-summary"></div>
+            </div>
+            <div id="activity-grid" class="activity-grid" aria-label="最近 6 个月文章和项目更新热力图"></div>
+            <div class="activity-legend" aria-hidden="true">
+              <span>少</span>
+              <i class="activity-sample activity-level-1"></i>
+              <i class="activity-sample activity-level-2"></i>
+              <i class="activity-sample activity-level-3"></i>
+              <span>多</span>
+              <span class="activity-legend-type article">文章</span>
+              <span class="activity-legend-type project">项目</span>
+            </div>
+          </section>
           <div class="skill-diamond-wrap" aria-label="技能云">
             <div id="skill-diamond" class="skill-diamond"></div>
           </div>
@@ -102,6 +121,15 @@
       </article>
 
       <aside class="timeline-panel">
+        <div id="tag-filter-panel" class="tag-filter-panel" hidden>
+          <div class="tag-filter-header">
+            <p>标签</p>
+            <h2>筛选文章</h2>
+          </div>
+          <label class="article-search-label" for="article-search">搜索文章</label>
+          <input id="article-search" class="article-search" type="search" placeholder="搜索标题、摘要、正文或标签" autocomplete="off">
+          <div id="tag-filter-list" class="tag-filter-list" aria-label="文章标签筛选"></div>
+        </div>
         <div class="timeline-header">
           <p>时间轴</p>
           <h2 id="timeline-heading">个人简历</h2>
@@ -113,6 +141,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-  <script src="app.js?v=20260514-12" type="module"></script>
+  <script src="app.js?v=20260611-10" type="module"></script>
 </body>
 </html>

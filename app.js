@@ -12,6 +12,9 @@ const tabDescriptions = {
 
 const tooltipGlossaryPath = "posts/tooltips.json";
 const skillsPath = "data/skills.json";
+const siteConfigPath = "data/site-config.json";
+const postMetadataPath = "data/post-metadata.json";
+const tagStylesPath = "data/tag-styles.json";
 
 const posts = [
   {
@@ -66,12 +69,33 @@ let lastState = { tab: "resume", slug: "" };
 let pendingRestoreTab = "";
 let tooltipGlossaryPromise;
 let skillsPromise;
+let siteConfigPromise;
+let postMetadataPromise;
+let tagStylesPromise;
+let postMetadata = {};
+let tagStyles = {};
+let siteConfig = {
+  showArticleDates: false,
+  showTimelineDates: true,
+  dateSource: "generated",
+  generatedDateField: "createdAt"
+};
+let tagFilterTouched = false;
+let activeArticleTags = new Set();
+let articleSearchQuery = "";
+let syncViewRun = 0;
+const postSearchTextCache = new Map();
 
 const tabsEls = [...document.querySelectorAll(".tab")];
 const welcomeViewEl = document.querySelector("#welcome-view");
 const skillDiamondEl = document.querySelector("#skill-diamond");
+const activityGridEl = document.querySelector("#activity-grid");
+const activitySummaryEl = document.querySelector("#activity-summary");
 const workspaceEl = document.querySelector(".workspace");
 const timelinePanelEl = document.querySelector(".timeline-panel");
+const tagFilterPanelEl = document.querySelector("#tag-filter-panel");
+const tagFilterListEl = document.querySelector("#tag-filter-list");
+const articleSearchEl = document.querySelector("#article-search");
 const timelineEl = document.querySelector("#timeline");
 const timelineHeadingEl = document.querySelector("#timeline-heading");
 const listTitleEl = document.querySelector("#list-title");
@@ -144,12 +168,14 @@ function initializeTheme() {
     themeToggleEl.addEventListener("click", () => {
       const currentTheme = document.documentElement.dataset.theme || "light";
       applyTheme(currentTheme === "dark" ? "light" : "dark", true);
+      syncView();
     });
   }
 
   colorSchemeQuery?.addEventListener("change", (event) => {
     if (!getStoredTheme()) {
       applyTheme(event.matches ? "dark" : "light");
+      syncView();
     }
   });
 }
@@ -166,20 +192,20 @@ marked.setOptions({
 });
 
 function formatDate(dateString) {
-  const [year, month, day] = dateString.split("-");
+  const [year, month, day] = String(dateString || "").slice(0, 10).split("-");
   return `${year}-${month}-${day}`;
 }
 
 async function getTooltipGlossary() {
   if (!tooltipGlossaryPromise) {
-    tooltipGlossaryPromise = fetch(tooltipGlossaryPath)
-      .then((response) => {
-        if (!response.ok) {
-          return {};
-        }
-        return response.json();
-      })
-      .catch(() => ({}));
+    tooltipGlossaryPromise = (async () => {
+      try {
+        const response = await fetch(tooltipGlossaryPath);
+        return response.ok ? await response.json() : {};
+      } catch (error) {
+        return {};
+      }
+    })();
   }
 
   return tooltipGlossaryPromise;
@@ -187,17 +213,233 @@ async function getTooltipGlossary() {
 
 async function getSkillsConfig() {
   if (!skillsPromise) {
-    skillsPromise = fetch(skillsPath)
-      .then((response) => {
-        if (!response.ok) {
-          return { weightRange: { min: 1, max: 10 }, skills: [] };
-        }
-        return response.json();
-      })
-      .catch(() => ({ weightRange: { min: 1, max: 10 }, skills: [] }));
+    skillsPromise = (async () => {
+      try {
+        const response = await fetch(skillsPath);
+        return response.ok ? await response.json() : { weightRange: { min: 1, max: 10 }, skills: [] };
+      } catch (error) {
+        return { weightRange: { min: 1, max: 10 }, skills: [] };
+      }
+    })();
   }
 
   return skillsPromise;
+}
+
+async function getSiteConfig() {
+  if (!siteConfigPromise) {
+    siteConfigPromise = (async () => {
+      try {
+        const response = await fetch(siteConfigPath);
+        return response.ok ? await response.json() : siteConfig;
+      } catch (error) {
+        return siteConfig;
+      }
+    })();
+  }
+
+  return siteConfigPromise;
+}
+
+async function getPostMetadata() {
+  if (!postMetadataPromise) {
+    postMetadataPromise = (async () => {
+      try {
+        const response = await fetch(postMetadataPath);
+        return response.ok ? await response.json() : {};
+      } catch (error) {
+        return {};
+      }
+    })();
+  }
+
+  return postMetadataPromise;
+}
+
+async function getTagStyles() {
+  if (!tagStylesPromise) {
+    tagStylesPromise = (async () => {
+      try {
+        const response = await fetch(tagStylesPath);
+        return response.ok ? await response.json() : {};
+      } catch (error) {
+        return {};
+      }
+    })();
+  }
+
+  return tagStylesPromise;
+}
+
+async function initializeSiteConfig() {
+  siteConfig = {
+    ...siteConfig,
+    ...(await getSiteConfig())
+  };
+
+  if (siteConfig.dateSource === "generated") {
+    postMetadata = await getPostMetadata();
+  }
+
+  tagStyles = await getTagStyles();
+}
+
+function shouldShowArticleDates() {
+  return Boolean(siteConfig.showArticleDates);
+}
+
+function shouldShowTimelineDates() {
+  return siteConfig.showTimelineDates !== false;
+}
+
+function getPostDate(post) {
+  if (siteConfig.dateSource === "generated") {
+    const field = siteConfig.generatedDateField || "createdAt";
+    return postMetadata[post.slug]?.[field] || post.date;
+  }
+
+  return post.date;
+}
+
+function getPostUpdatedDate(post) {
+  return postMetadata[post.slug]?.updatedAt || post.date;
+}
+
+function toDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateKey(dateValue) {
+  const [year, month, day] = String(dateValue || "").slice(0, 10).split("-").map(Number);
+  if (!year || !month || !day) {
+    return "";
+  }
+
+  return toDateKey(new Date(year, month - 1, day));
+}
+
+function addDays(date, days) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+}
+
+function addMonths(date, months) {
+  const nextDate = new Date(date);
+  nextDate.setMonth(nextDate.getMonth() + months);
+  return nextDate;
+}
+
+function getActivityClass(entry) {
+  if (!entry.total) {
+    return "is-empty";
+  }
+
+  const level = Math.min(4, entry.total);
+  if (entry.articles && entry.projects) {
+    return `activity-level-${level} is-mixed`;
+  }
+
+  return `activity-level-${level} ${entry.articles ? "is-article" : "is-project"}`;
+}
+
+function getActivityLabel(dateKey, entry) {
+  if (!entry.total) {
+    return `${dateKey} 没有更新`;
+  }
+
+  const pieces = [];
+  if (entry.articles) {
+    pieces.push(`${entry.articles} 篇文章`);
+  }
+  if (entry.projects) {
+    pieces.push(`${entry.projects} 个项目`);
+  }
+
+  return `${dateKey} 更新 ${pieces.join("，")}`;
+}
+
+function renderActivityGrid() {
+  if (!activityGridEl || !activitySummaryEl) {
+    return;
+  }
+
+  const trackedPosts = posts.filter((post) => post.tab === "articles" || post.tab === "projects");
+  const updatesByDate = new Map();
+
+  trackedPosts.forEach((post) => {
+    const dateKey = parseDateKey(getPostUpdatedDate(post));
+    if (!dateKey) {
+      return;
+    }
+
+    const entry = updatesByDate.get(dateKey) || { articles: 0, projects: 0, total: 0 };
+    if (post.tab === "articles") {
+      entry.articles += 1;
+    } else {
+      entry.projects += 1;
+    }
+    entry.total += 1;
+    updatesByDate.set(dateKey, entry);
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sixMonthsAgo = addMonths(today, -6);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+  const startDate = addDays(sixMonthsAgo, -sixMonthsAgo.getDay());
+  const endDate = addDays(today, 6 - today.getDay());
+  const totalDays = Math.round((endDate - startDate) / 86400000) + 1;
+  const weeks = Math.ceil(totalDays / 7);
+  const cells = [];
+  const monthLabels = [];
+  let lastMonth = "";
+
+  for (let dayIndex = 0; dayIndex < weeks * 7; dayIndex += 1) {
+    const date = addDays(startDate, dayIndex);
+    const dateKey = toDateKey(date);
+    const entry = updatesByDate.get(dateKey) || { articles: 0, projects: 0, total: 0 };
+    const week = Math.floor(dayIndex / 7) + 1;
+    const day = date.getDay() + 1;
+    const isOutsideRange = date < sixMonthsAgo || date > today;
+
+    if (day === 1 && date >= startDate && date <= today) {
+      const month = `${date.getMonth() + 1}月`;
+      if (month !== lastMonth) {
+        monthLabels.push(`<span class="activity-month" style="--week: ${week};">${month}</span>`);
+        lastMonth = month;
+      }
+    }
+
+    cells.push(`
+      <span
+        class="activity-cell ${getActivityClass(entry)} ${isOutsideRange ? "is-outside-range" : ""}"
+        style="--week: ${week}; --day: ${day};"
+        title="${escapeHtml(getActivityLabel(dateKey, entry))}"
+        aria-label="${escapeHtml(getActivityLabel(dateKey, entry))}"
+      ></span>
+    `);
+  }
+
+  const articleUpdates = [...updatesByDate.values()].reduce((total, entry) => total + entry.articles, 0);
+  const projectUpdates = [...updatesByDate.values()].reduce((total, entry) => total + entry.projects, 0);
+  activitySummaryEl.innerHTML = `
+    <span>文章 ${articleUpdates} 次更新</span>
+    <span>项目 ${projectUpdates} 次更新</span>
+  `;
+  activityGridEl.style.setProperty("--weeks", weeks);
+  activityGridEl.innerHTML = `
+    <div class="activity-months" aria-hidden="true">${monthLabels.join("")}</div>
+    <div class="activity-weekdays" aria-hidden="true">
+      <span style="--day: 2;">周一</span>
+      <span style="--day: 4;">周三</span>
+      <span style="--day: 6;">周五</span>
+    </div>
+    <div class="activity-cells">${cells.join("")}</div>
+  `;
 }
 
 function mapSkillSize(weight, minWeight, maxWeight) {
@@ -212,6 +454,121 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function stripMarkdownForSearch(markdown) {
+  return String(markdown || "")
+    .replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/```[a-zA-Z0-9_-]*|```/g, " "))
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^>\s?/gm, "")
+    .replace(/^[\s-]*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/[*_~>#|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getFallbackSearchText(post) {
+  return [
+    post.title,
+    post.summary,
+    ...(post.tags || [])
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+async function getPostSearchText(post) {
+  if (postSearchTextCache.has(post.slug)) {
+    return postSearchTextCache.get(post.slug);
+  }
+
+  const fallbackText = getFallbackSearchText(post);
+
+  try {
+    const response = await fetch(post.file);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${post.file}`);
+    }
+
+    const markdown = await response.text();
+    const searchText = `${fallbackText} ${stripMarkdownForSearch(markdown)}`.replace(/\s+/g, " ").trim();
+    postSearchTextCache.set(post.slug, searchText);
+    return searchText;
+  } catch (error) {
+    postSearchTextCache.set(post.slug, fallbackText);
+    return fallbackText;
+  }
+}
+
+function highlightSearchText(text, query) {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return escapeHtml(text);
+  }
+
+  const pattern = new RegExp(escapeRegExp(trimmedQuery), "gi");
+  let cursor = 0;
+  let highlighted = "";
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    highlighted += escapeHtml(text.slice(cursor, match.index));
+    highlighted += `<mark class="search-highlight">${escapeHtml(match[0])}</mark>`;
+    cursor = match.index + match[0].length;
+  }
+
+  return highlighted + escapeHtml(text.slice(cursor));
+}
+
+function buildSearchSnippet(post) {
+  const query = articleSearchQuery.trim();
+  if (!query) {
+    return "";
+  }
+
+  const source = postSearchTextCache.get(post.slug) || getFallbackSearchText(post);
+  const matchIndex = source.toLowerCase().indexOf(query.toLowerCase());
+  if (matchIndex < 0) {
+    return "";
+  }
+
+  const contextLength = 46;
+  const start = Math.max(0, matchIndex - contextLength);
+  const end = Math.min(source.length, matchIndex + query.length + contextLength);
+  const snippet = `${start > 0 ? "..." : ""}${source.slice(start, end).trim()}${end < source.length ? "..." : ""}`;
+
+  return highlightSearchText(snippet, query);
+}
+
+function getTagStyleAttribute(tag) {
+  const theme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  const style = tagStyles[tag]?.[theme] || tagStyles[tag]?.light;
+
+  if (!style) {
+    return "";
+  }
+
+  const declarations = [
+    ["--tag-text", style.text],
+    ["--tag-bg", style.background],
+    ["--tag-border", style.border],
+    ["--tag-glow", style.glow]
+  ]
+    .filter(([, value]) => value)
+    .map(([property, value]) => `${property}: ${value}`)
+    .join("; ");
+
+  return declarations ? ` style="${escapeHtml(declarations)}"` : "";
 }
 
 function getDiamondPosition(index, total) {
@@ -235,12 +592,16 @@ function getDiamondPosition(index, total) {
   };
 }
 
-async function renderSkillDiamond() {
+async function renderSkillDiamond(expectedRunId = syncViewRun) {
   if (!skillDiamondEl) {
     return;
   }
 
   const config = await getSkillsConfig();
+  if (expectedRunId !== syncViewRun) {
+    return;
+  }
+
   const skills = [...(config.skills || [])].sort((a, b) => (b.weight || 1) - (a.weight || 1));
   const minWeight = config.weightRange?.min ?? Math.min(...skills.map((skill) => skill.weight || 1), 1);
   const maxWeight = config.weightRange?.max ?? Math.max(...skills.map((skill) => skill.weight || 1), 10);
@@ -290,6 +651,47 @@ function getPostsByTab(tab) {
   return posts.filter((post) => post.tab === tab);
 }
 
+function getArticleTags() {
+  return [...new Set(getPostsByTab("articles").flatMap((post) => post.tags || []))]
+    .sort((a, b) => a.localeCompare(b, "zh-CN"));
+}
+
+function syncDefaultArticleTags(tags) {
+  if (!tagFilterTouched) {
+    activeArticleTags = new Set(tags);
+  }
+}
+
+async function postMatchesSearch(post) {
+  const query = articleSearchQuery.trim().toLowerCase();
+  if (!query) {
+    return true;
+  }
+
+  const searchText = await getPostSearchText(post);
+  return searchText.toLowerCase().includes(query);
+}
+
+async function getFilteredPostsByTab(tab) {
+  const tabPosts = getPostsByTab(tab);
+  if (tab !== "articles") {
+    return tabPosts;
+  }
+
+  const tags = getArticleTags();
+  syncDefaultArticleTags(tags);
+
+  const tagFilteredPosts = (!tagFilterTouched || activeArticleTags.size === tags.length)
+    ? tabPosts
+    : tabPosts.filter((post) => (post.tags || []).some((tag) => activeArticleTags.has(tag)));
+
+  const matchedPosts = await Promise.all(
+    tagFilteredPosts.map(async (post) => ((await postMatchesSearch(post)) ? post : null))
+  );
+
+  return matchedPosts.filter(Boolean);
+}
+
 function rememberListScroll(tab) {
   listScrollPositions[tab] = window.scrollY;
 }
@@ -336,6 +738,7 @@ function updateReadingLayout(tab, slug) {
     workspaceEl.classList.add("is-single-column");
     workspaceEl.classList.remove("is-reading-detail");
     timelinePanelEl.hidden = true;
+    if (tagFilterPanelEl) { tagFilterPanelEl.hidden = true; }
 
     if (edgeBackButtonEl) {
       edgeBackButtonEl.hidden = true;
@@ -350,6 +753,9 @@ function updateReadingLayout(tab, slug) {
   workspaceEl.classList.toggle("is-reading-detail", isReadingDetail);
   workspaceEl.classList.toggle("is-single-column", isSingleColumn);
   timelinePanelEl.hidden = !showTimeline;
+  if (tagFilterPanelEl) {
+    tagFilterPanelEl.hidden = !showTimeline;
+  }
 
   if (edgeBackButtonEl) {
     edgeBackButtonEl.hidden = !isReadingDetail;
@@ -361,9 +767,9 @@ function renderList(currentTab, filteredPosts, currentSlug) {
   listDescriptionEl.textContent = tabDescriptions[currentTab];
 
   if (!filteredPosts.length) {
-    articleListEl.innerHTML = "";
+    articleListEl.innerHTML = `<p class="archive-empty-state">${articleSearchQuery.trim() ? "没有匹配当前搜索和标签的文章。" : "没有匹配当前标签的文章。"}</p>`;
     if (articleEmptyEl) { articleEmptyEl.hidden = false; }
-    articleListViewEl.hidden = true;
+    articleListViewEl.hidden = false;
     articleDetailViewEl.hidden = true;
     return;
   }
@@ -372,18 +778,23 @@ function renderList(currentTab, filteredPosts, currentSlug) {
   articleListViewEl.hidden = false;
 
   articleListEl.innerHTML = filteredPosts
-    .map((post) => `
-      <a class="archive-card ${post.slug === currentSlug ? "is-active" : ""}" href="#tab=${currentTab}&post=${post.slug}">
-        <p class="archive-date">${formatDate(post.date)}</p>
-        <h3 class="archive-title">${post.title}</h3>
-        <p class="archive-preview">${post.summary}</p>
-      </a>
-    `)
+    .map((post) => {
+      const searchSnippet = currentTab === "articles" ? buildSearchSnippet(post) : "";
+      return `
+        <a class="archive-card ${post.slug === currentSlug ? "is-active" : ""}" href="#tab=${currentTab}&post=${post.slug}">
+          ${shouldShowArticleDates() ? `<p class="archive-date">${formatDate(getPostDate(post))}</p>` : ""}
+          <h3 class="archive-title">${escapeHtml(post.title)}</h3>
+          ${searchSnippet
+            ? `<p class="archive-snippet">${searchSnippet}</p>`
+            : `<p class="archive-preview">${escapeHtml(post.summary)}</p>`}
+        </a>
+      `;
+    })
     .join("");
 }
 
-function renderTimeline(currentTab, currentSlug) {
-  const filteredPosts = getPostsByTab(currentTab);
+function renderTimeline(currentTab, currentSlug, visiblePosts = getPostsByTab(currentTab)) {
+  const filteredPosts = visiblePosts;
   timelineHeadingEl.textContent = tabs[currentTab];
 
   if (!filteredPosts.length) {
@@ -406,20 +817,70 @@ function renderTimeline(currentTab, currentSlug) {
 
       return `
         <a class="timeline-entry ${emphasisClass}" href="#tab=${currentTab}&post=${post.slug}">
-          <span class="timeline-entry-date">${formatDate(post.date)}</span>
-          <span class="timeline-entry-title">${post.title}</span>
+          ${shouldShowTimelineDates() ? `<span class="timeline-entry-date">${formatDate(getPostDate(post))}</span>` : ""}
+          <span class="timeline-entry-title">${escapeHtml(post.title)}</span>
         </a>
       `;
     })
     .join("");
 }
 
+function renderTagFilters() {
+  if (!tagFilterListEl) {
+    return;
+  }
+
+  if (articleSearchEl && articleSearchEl.value !== articleSearchQuery) {
+    articleSearchEl.value = articleSearchQuery;
+  }
+
+  const tags = getArticleTags();
+  syncDefaultArticleTags(tags);
+
+  if (!tags.length) {
+    tagFilterListEl.innerHTML = '<p class="tag-filter-empty">还没有标签。</p>';
+    return;
+  }
+
+  tagFilterListEl.innerHTML = tags
+    .map((tag) => `
+      <button class="tag-filter ${activeArticleTags.has(tag) ? "is-active" : ""}" type="button" data-tag="${escapeHtml(tag)}"${getTagStyleAttribute(tag)}>
+        ${escapeHtml(tag)}
+      </button>
+    `)
+    .join("");
+
+  tagFilterListEl.querySelectorAll(".tag-filter").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tag = button.dataset.tag;
+
+      if (!tagFilterTouched) {
+        activeArticleTags = new Set([tag]);
+        tagFilterTouched = true;
+      } else if (activeArticleTags.has(tag)) {
+        activeArticleTags.delete(tag);
+      } else {
+        activeArticleTags.add(tag);
+      }
+
+      if (!activeArticleTags.size) {
+        tagFilterTouched = false;
+      }
+
+      const { tab } = getStateFromHash();
+      setHash(tab);
+      syncView();
+    });
+  });
+}
+
 function renderArticleMeta(post) {
   articleCategoryEl.textContent = tabs[post.tab];
-  articleDateEl.textContent = formatDate(post.date);
+  articleDateEl.textContent = formatDate(getPostDate(post));
+  articleDateEl.hidden = !shouldShowArticleDates();
   articleTitleEl.textContent = post.title;
   articleSummaryEl.textContent = post.summary;
-  articleTagsEl.innerHTML = post.tags.map((tag) => `<span class="tag">${tag}</span>`).join("");
+  articleTagsEl.innerHTML = post.tags.map((tag) => `<span class="tag"${getTagStyleAttribute(tag)}>${escapeHtml(tag)}</span>`).join("");
 }
 
 function createTooltipNode(label, tooltip) {
@@ -478,7 +939,7 @@ function applyInlineTooltips(root, glossary) {
   });
 }
 
-async function loadArticle(post) {
+async function loadArticle(post, expectedRunId = syncViewRun) {
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = false;
   if (articleEmptyEl) { articleEmptyEl.hidden = true; }
@@ -501,12 +962,21 @@ async function loadArticle(post) {
       response.text(),
       getTooltipGlossary()
     ]);
+
+    if (expectedRunId !== syncViewRun) {
+      return;
+    }
+
     renderArticleMeta(post);
     articleContentEl.innerHTML = marked.parse(markdown);
     applyInlineTooltips(articleContentEl, tooltipGlossary);
     articleContentEl.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
     if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   } catch (error) {
+    if (expectedRunId !== syncViewRun) {
+      return;
+    }
+
     if (articleLoadingEl) { articleLoadingEl.hidden = true; }
     articleContentEl.innerHTML = `
       <div class="detail-error">
@@ -534,7 +1004,7 @@ function showArchiveOnly(currentTab, filteredPosts) {
   }
 }
 
-function showWelcome() {
+async function showWelcome(expectedRunId = syncViewRun) {
   if (welcomeViewEl) { welcomeViewEl.hidden = false; }
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = true;
@@ -542,19 +1012,29 @@ function showWelcome() {
   contentMetaEl.hidden = false;
   articleContentEl.innerHTML = "";
   if (articleEmptyEl) { articleEmptyEl.hidden = true; }
-  renderSkillDiamond();
+  renderActivityGrid();
+  await renderSkillDiamond(expectedRunId);
 }
 
-function syncView() {
+async function syncView() {
+  const runId = ++syncViewRun;
   const currentState = getStateFromHash();
   const { tab, slug } = currentState;
-  const filteredPosts = getPostsByTab(tab);
 
   if (tab === "welcome") {
     renderTabs(tab);
     updateReadingLayout(tab, slug);
-    showWelcome();
+    await showWelcome(runId);
+    if (runId !== syncViewRun) {
+      return;
+    }
     lastState = currentState;
+    return;
+  }
+
+  const filteredPosts = await getFilteredPostsByTab(tab);
+
+  if (runId !== syncViewRun) {
     return;
   }
 
@@ -577,7 +1057,8 @@ function syncView() {
   }
 
   renderTabs(tab);
-  renderTimeline(tab, timelineFocusSlug);
+  renderTagFilters();
+  renderTimeline(tab, timelineFocusSlug, filteredPosts);
   updateReadingLayout(tab, slug);
 
   if (!filteredPosts.length) {
@@ -606,7 +1087,10 @@ function syncView() {
     renderList(tab, filteredPosts, activePost.slug);
   }
 
-  loadArticle(activePost);
+  await loadArticle(activePost, runId);
+  if (runId !== syncViewRun) {
+    return;
+  }
   lastState = currentState;
 }
 
@@ -645,7 +1129,22 @@ if (edgeBackButtonEl) {
   });
 }
 
+if (articleSearchEl) {
+  articleSearchEl.addEventListener("input", () => {
+    articleSearchQuery = articleSearchEl.value;
+    const { tab } = getStateFromHash();
+    setHash(tab);
+    syncView();
+  });
+}
+
 window.addEventListener("hashchange", syncView);
 window.addEventListener("wheel", handleTopEdgeScroll, { passive: true });
-initializeTheme();
-syncView();
+
+async function bootstrap() {
+  initializeTheme();
+  await initializeSiteConfig();
+  syncView();
+}
+
+bootstrap();

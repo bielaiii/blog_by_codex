@@ -1,0 +1,6 @@
+{
+  "showArticleDates": false,
+  "showTimelineDates": true,
+  "dateSource": "generated",
+  "generatedDateField": "createdAt"
+}

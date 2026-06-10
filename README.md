@@ -59,6 +59,82 @@
 
 如果你说的“归档到个人文章中”是默认个人文章区，就把它写成 `tab: "resume"`。
 
+## 分享文章的标签筛选
+
+`分享文章` 右侧会自动汇总 `app.js` 中文章元信息里的 `tags` 字段。新增文章时，只要在对应文章对象里写上：
+
+```js
+tags: ["Markdown", "代码"]
+```
+
+刷新页面后，新标签会自动出现在右侧标签筛选区。默认所有标签都是激活状态；第一次点击某个标签时，会只保留这个标签，后续点击则会在当前激活标签基础上继续多选或取消。右侧搜索框会同时搜索文章标题、摘要、正文和标签，并和标签筛选一起生效；命中文章正文时，左侧归档卡片会显示带高亮的上下文片段。
+
+## 标签颜色怎么配置
+
+特定标签的颜色配置在：
+
+- `data/tag-styles.json`
+
+按标签名配置浅色和深色两套颜色：
+
+```json
+{
+  "Markdown": {
+    "light": {
+      "text": "#7c3aed",
+      "background": "rgba(124, 58, 237, 0.12)",
+      "border": "rgba(124, 58, 237, 0.22)",
+      "glow": "rgba(124, 58, 237, 0.14)"
+    },
+    "dark": {
+      "text": "#ddd6fe",
+      "background": "rgba(167, 139, 250, 0.18)",
+      "border": "rgba(221, 214, 254, 0.28)",
+      "glow": "rgba(167, 139, 250, 0.2)"
+    }
+  }
+}
+```
+
+没有配置的标签会继续使用默认颜色。
+
+## 是否显示文章日期
+
+文章日期显示开关在：
+
+- `data/site-config.json`
+
+默认关闭：
+
+```json
+{
+  "showArticleDates": false,
+  "showTimelineDates": true,
+  "dateSource": "generated",
+  "generatedDateField": "createdAt"
+}
+```
+
+把 `showArticleDates` 改成 `true` 后，归档卡片和文章详情会显示日期。右侧时间轴由 `showTimelineDates` 单独控制，默认保持显示日期。
+
+`dateSource` 可选：
+
+- `generated`：读取 `data/post-metadata.json`，这个文件由 `scripts/generate-post-metadata.js` 从 Git 记录自动生成。
+- `metadata`：读取 `app.js` 文章元信息里的 `date` 字段。
+
+`generatedDateField` 可选：
+
+- `createdAt`：文章文件第一次进入 Git 的时间。
+- `updatedAt`：文章文件最近一次提交修改的时间。
+
+本仓库已经包含 GitHub Pages workflow。每次 push 到 `master` 时，会自动运行生成脚本并部署静态站点；本地需要手动刷新生成文件时，可以运行：
+
+```bash
+node scripts/generate-post-metadata.js
+```
+
+首页的 GitHub 风格更新格子图也读取这份生成文件，按 `updatedAt` 统计 `分享文章` 和 `项目` 两个栏目的更新。
+
 ## 在哪里保存图片
 
 建议把文章图片放在：

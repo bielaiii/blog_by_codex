@@ -1,0 +1,30 @@
+{
+  "Markdown": {
+    "light": {
+      "text": "#7c3aed",
+      "background": "rgba(124, 58, 237, 0.12)",
+      "border": "rgba(124, 58, 237, 0.22)",
+      "glow": "rgba(124, 58, 237, 0.14)"
+    },
+    "dark": {
+      "text": "#ddd6fe",
+      "background": "rgba(167, 139, 250, 0.18)",
+      "border": "rgba(221, 214, 254, 0.28)",
+      "glow": "rgba(167, 139, 250, 0.2)"
+    }
+  },
+  "代码": {
+    "light": {
+      "text": "#047857",
+      "background": "rgba(4, 120, 87, 0.12)",
+      "border": "rgba(4, 120, 87, 0.2)",
+      "glow": "rgba(4, 120, 87, 0.12)"
+    },
+    "dark": {
+      "text": "#a7f3d0",
+      "background": "rgba(16, 185, 129, 0.16)",
+      "border": "rgba(167, 243, 208, 0.26)",
+      "glow": "rgba(16, 185, 129, 0.18)"
+    }
+  }
+}
