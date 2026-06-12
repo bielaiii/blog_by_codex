@@ -1,4 +1,9 @@
 {
+  "Hillis-Steele_scan": {
+    "file": "posts/Hillis-Steele_scan.md",
+    "createdAt": "2026-06-12T10:07:52.809Z",
+    "updatedAt": "2026-06-12T10:07:52.809Z"
+  },
   "code-snippet-demo": {
     "file": "posts/code-snippet-demo.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
@@ -18,6 +23,11 @@
     "file": "posts/resume-profile.md",
     "createdAt": "2026-03-29T15:55:53+08:00",
     "updatedAt": "2026-03-29T17:08:18+08:00"
+  },
+  "why_tree_reduction_and_scan_work": {
+    "file": "posts/why_tree_reduction_and_scan_work.md",
+    "createdAt": "2026-06-12T10:07:52.862Z",
+    "updatedAt": "2026-06-12T10:07:52.862Z"
   },
   "writing-workflow": {
     "file": "posts/writing-workflow.md",

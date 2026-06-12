@@ -35,7 +35,7 @@
 - `posts/my-new-post.md`
 - `posts/my-project-note.md`
 
-然后在 [C:\Users\amino\Documents\New project\app.js](C:\Users\amino\Documents\New project\app.js) 里的 `posts` 数组增加一条：
+然后在 `app.js` 里的 `posts` 数组增加一条：
 
 ```js
 {
@@ -46,6 +46,65 @@
   summary: "这里写归档页显示的预览文字，建议 2 到 3 行长度。",
   tags: ["随笔", "设计"],
   file: "posts/my-new-post.md"
+}
+```
+
+## 草稿和隐藏文章
+
+文章元信息支持两个隐藏配置：
+
+```js
+{
+  slug: "my-draft",
+  tab: "articles",
+  title: "还没写完的文章",
+  date: "2026-03-28",
+  summary: "暂时不会出现在页面上。",
+  tags: ["草稿"],
+  file: "posts/my-draft.md",
+  draft: true
+}
+```
+
+- `draft: true`：草稿，不出现在归档、搜索、时间轴和首页更新格子图里。
+- `hidden: true` 或 `visible: false`：隐藏文章，效果同草稿。
+
+直接访问被隐藏文章的链接时，页面会回到对应栏目的归档列表。
+
+## 文章目录
+
+文章详情页会根据正文里的 `##` 和 `###` 自动生成目录，显示在正文左侧。窄屏下目录会移动到正文上方。
+
+## 行内背景高亮
+
+正文里可以用扩展语法给一小段文字加背景色：
+
+```md
+==默认高亮==
+==blue:蓝色高亮==
+==warn:警示高亮==
+```
+
+高亮颜色配置在：
+
+- `data/highlight-styles.json`
+
+每个高亮样式都需要同时配置 `background` 和 `text`，确保文字和背景有明显区分。配置按浅色/深色主题拆开：
+
+```json
+{
+  "blue": {
+    "light": {
+      "text": "#06245c",
+      "background": "rgba(150, 196, 255, 0.66)",
+      "border": "rgba(13, 107, 255, 0.2)"
+    },
+    "dark": {
+      "text": "#061835",
+      "background": "rgba(190, 218, 255, 0.92)",
+      "border": "rgba(190, 218, 255, 0.34)"
+    }
+  }
 }
 ```
 

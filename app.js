@@ -15,6 +15,7 @@ const skillsPath = "data/skills.json";
 const siteConfigPath = "data/site-config.json";
 const postMetadataPath = "data/post-metadata.json";
 const tagStylesPath = "data/tag-styles.json";
+const highlightStylesPath = "data/highlight-styles.json";
 
 const posts = [
   {
@@ -54,6 +55,24 @@ const posts = [
     file: "posts/code-snippet-demo.md"
   },
   {
+    slug: "Hillis-Steele_scan",
+    tab: "articles",
+    title: "Hillis-Steele scan",
+    date: "2026-06-12",
+    summary: "用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。",
+    tags: ["CUDA", "并行算法", "Scan"],
+    file: "posts/Hillis-Steele_scan.md"
+  },
+  {
+    slug: "why_tree_reduction_and_scan_work",
+    tab: "articles",
+    title: "为什么 reduce 和 scan 能刚好处理数组",
+    date: "2026-06-12",
+    summary: "从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。",
+    tags: ["并行算法", "Reduction", "Scan"],
+    file: "posts/why_tree_reduction_and_scan_work.md"
+  },
+  {
     slug: "project-blueprint",
     tab: "projects",
     title: "个人项目页应该像一个实时项目档案",
@@ -72,8 +91,10 @@ let skillsPromise;
 let siteConfigPromise;
 let postMetadataPromise;
 let tagStylesPromise;
+let highlightStylesPromise;
 let postMetadata = {};
 let tagStyles = {};
+let highlightStyles = {};
 let siteConfig = {
   showArticleDates: false,
   showTimelineDates: true,
@@ -111,6 +132,8 @@ const articleTitleEl = document.querySelector("#article-title");
 const articleSummaryEl = document.querySelector("#article-summary");
 const articleTagsEl = document.querySelector("#article-tags");
 const articleContentEl = document.querySelector("#article-content");
+const articleTocEl = document.querySelector("#article-toc");
+const articleTocListEl = document.querySelector("#article-toc-list");
 const backButtonEl = document.querySelector("#back-button");
 const edgeBackButtonEl = document.querySelector("#edge-back-button");
 const contentMetaEl = document.querySelector(".content-meta");
@@ -168,14 +191,14 @@ function initializeTheme() {
     themeToggleEl.addEventListener("click", () => {
       const currentTheme = document.documentElement.dataset.theme || "light";
       applyTheme(currentTheme === "dark" ? "light" : "dark", true);
-      syncView();
+      refreshThemeBoundStyles();
     });
   }
 
   colorSchemeQuery?.addEventListener("change", (event) => {
     if (!getStoredTheme()) {
       applyTheme(event.matches ? "dark" : "light");
-      syncView();
+      refreshThemeBoundStyles();
     }
   });
 }
@@ -271,6 +294,21 @@ async function getTagStyles() {
   return tagStylesPromise;
 }
 
+async function getHighlightStyles() {
+  if (!highlightStylesPromise) {
+    highlightStylesPromise = (async () => {
+      try {
+        const response = await fetch(highlightStylesPath);
+        return response.ok ? await response.json() : {};
+      } catch (error) {
+        return {};
+      }
+    })();
+  }
+
+  return highlightStylesPromise;
+}
+
 async function initializeSiteConfig() {
   siteConfig = {
     ...siteConfig,
@@ -282,6 +320,7 @@ async function initializeSiteConfig() {
   }
 
   tagStyles = await getTagStyles();
+  highlightStyles = await getHighlightStyles();
 }
 
 function shouldShowArticleDates() {
@@ -299,6 +338,10 @@ function getPostDate(post) {
   }
 
   return post.date;
+}
+
+function isPostVisible(post) {
+  return !post.draft && !post.hidden && post.visible !== false;
 }
 
 function getPostUpdatedDate(post) {
@@ -367,7 +410,7 @@ function renderActivityGrid() {
     return;
   }
 
-  const trackedPosts = posts.filter((post) => post.tab === "articles" || post.tab === "projects");
+  const trackedPosts = posts.filter((post) => isPostVisible(post) && (post.tab === "articles" || post.tab === "projects"));
   const updatesByDate = new Map();
 
   trackedPosts.forEach((post) => {
@@ -462,6 +505,7 @@ function escapeRegExp(value) {
 
 function stripMarkdownForSearch(markdown) {
   return String(markdown || "")
+    .replace(/==(?:(default|[a-zA-Z0-9_-]+):)?([^=\n][\s\S]*?[^=\n])==/g, "$2")
     .replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g, "$1")
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
@@ -562,13 +606,46 @@ function getTagStyleAttribute(tag) {
     ["--tag-text", style.text],
     ["--tag-bg", style.background],
     ["--tag-border", style.border],
-    ["--tag-glow", style.glow]
+    ["--tag-glow", style.glow],
+    ["--tag-active-text", style.activeText],
+    ["--tag-active-bg", style.activeBackground],
+    ["--tag-active-border", style.activeBorder],
+    ["--tag-active-glow", style.activeGlow]
   ]
     .filter(([, value]) => value)
     .map(([property, value]) => `${property}: ${value}`)
     .join("; ");
 
   return declarations ? ` style="${escapeHtml(declarations)}"` : "";
+}
+
+function applyHighlightStyle(node, key) {
+  const theme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  const style = highlightStyles[key]?.[theme] || highlightStyles.default?.[theme] || highlightStyles.default?.light;
+
+  if (!style) {
+    return;
+  }
+
+  if (style.text) {
+    node.style.setProperty("--highlight-text", style.text);
+  }
+  if (style.background) {
+    node.style.setProperty("--highlight-bg", style.background);
+  }
+  if (style.border) {
+    node.style.setProperty("--highlight-border", style.border);
+  }
+}
+
+function refreshThemeBoundStyles() {
+  document.querySelectorAll(".inline-highlight").forEach((node) => {
+    applyHighlightStyle(node, node.dataset.highlight || "default");
+  });
+
+  document.querySelectorAll(".tag-filter").forEach((button) => {
+    button.setAttribute("style", getTagStyleAttribute(button.dataset.tag || ""));
+  });
 }
 
 function getDiamondPosition(index, total) {
@@ -648,7 +725,7 @@ function setHash(tab, slug = "") {
 }
 
 function getPostsByTab(tab) {
-  return posts.filter((post) => post.tab === tab);
+  return posts.filter((post) => post.tab === tab && isPostVisible(post));
 }
 
 function getArticleTags() {
@@ -883,6 +960,81 @@ function renderArticleMeta(post) {
   articleTagsEl.innerHTML = post.tags.map((tag) => `<span class="tag"${getTagStyleAttribute(tag)}>${escapeHtml(tag)}</span>`).join("");
 }
 
+function getHeadingId(text, usedIds) {
+  const base = String(text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "") || "section";
+  let id = base;
+  let index = 2;
+
+  while (usedIds.has(id)) {
+    id = `${base}-${index}`;
+    index += 1;
+  }
+
+  usedIds.add(id);
+  return id;
+}
+
+function scrollToArticleHeading(headingId) {
+  const heading = document.getElementById(headingId);
+  if (!heading) {
+    return;
+  }
+
+  const topbarOffset = document.body.classList.contains("is-topbar-collapsed") ? 82 : 150;
+  const top = heading.getBoundingClientRect().top + window.scrollY - topbarOffset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+function renderArticleToc(post) {
+  if (!articleTocEl || !articleTocListEl) {
+    return;
+  }
+
+  if (post.tab === "resume") {
+    articleDetailViewEl.classList.remove("has-toc");
+    articleTocEl.hidden = true;
+    articleTocListEl.innerHTML = "";
+    return;
+  }
+
+  const usedIds = new Set();
+  const headings = [...articleContentEl.querySelectorAll("h2, h3")];
+  const tocItems = headings.map((heading) => {
+    if (!heading.id) {
+      heading.id = getHeadingId(heading.textContent, usedIds);
+    } else {
+      usedIds.add(heading.id);
+    }
+
+    return {
+      id: heading.id,
+      text: heading.textContent.trim(),
+      level: heading.tagName === "H3" ? 3 : 2
+    };
+  }).filter((item) => item.text);
+
+  const hasToc = tocItems.length >= 2;
+  articleDetailViewEl.classList.toggle("has-toc", hasToc);
+  articleTocEl.hidden = !hasToc;
+  articleTocListEl.innerHTML = tocItems
+    .map((item) => `
+      <button class="article-toc-link ${item.level === 3 ? "is-sub" : ""}" type="button" data-heading-id="${escapeHtml(item.id)}">
+        ${escapeHtml(item.text)}
+      </button>
+    `)
+    .join("");
+
+  articleTocListEl.querySelectorAll(".article-toc-link").forEach((button) => {
+    button.addEventListener("click", () => {
+      scrollToArticleHeading(button.dataset.headingId);
+    });
+  });
+}
+
 function createTooltipNode(label, tooltip) {
   const node = document.createElement("span");
   node.className = "inline-tooltip";
@@ -891,6 +1043,54 @@ function createTooltipNode(label, tooltip) {
   node.dataset.tooltip = tooltip;
   node.setAttribute("aria-label", `${label}：${tooltip}`);
   return node;
+}
+
+function createHighlightNode(label, styleKey) {
+  const node = document.createElement("mark");
+  node.className = "inline-highlight";
+  node.textContent = label;
+  node.dataset.highlight = styleKey;
+  applyHighlightStyle(node, styleKey);
+  return node;
+}
+
+function applyInlineHighlights(root) {
+  const ignoredParents = new Set(["CODE", "PRE", "A", "SCRIPT", "STYLE"]);
+  const highlightPattern = /==(?:(default|[a-zA-Z0-9_-]+):)?([^=\n][\s\S]*?[^=\n])==/g;
+  const hasHighlightPattern = /==(?:(default|[a-zA-Z0-9_-]+):)?([^=\n][\s\S]*?[^=\n])==/;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parentElement = node.parentElement;
+      if (!parentElement || ignoredParents.has(parentElement.tagName)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return hasHighlightPattern.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    }
+  });
+  const markedTextNodes = [];
+
+  while (walker.nextNode()) {
+    markedTextNodes.push(walker.currentNode);
+  }
+
+  markedTextNodes.forEach((textNode) => {
+    const fragment = document.createDocumentFragment();
+    const text = textNode.nodeValue;
+    let cursor = 0;
+
+    text.replace(highlightPattern, (match, keyValue, labelValue, offset) => {
+      const label = labelValue.trim();
+      const styleKey = (keyValue || "default").trim();
+
+      fragment.append(document.createTextNode(text.slice(cursor, offset)));
+      fragment.append(label ? createHighlightNode(label, styleKey) : document.createTextNode(match));
+      cursor = offset + match.length;
+      return match;
+    });
+
+    fragment.append(document.createTextNode(text.slice(cursor)));
+    textNode.replaceWith(fragment);
+  });
 }
 
 function applyInlineTooltips(root, glossary) {
@@ -939,6 +1139,35 @@ function applyInlineTooltips(root, glossary) {
   });
 }
 
+function getCodeLanguageLabel(codeBlock) {
+  const languageClass = [...codeBlock.classList].find((className) => className.startsWith("language-"));
+  if (!languageClass) {
+    return "";
+  }
+
+  return languageClass.replace("language-", "").trim().toUpperCase();
+}
+
+function decorateCodeBlocks(root) {
+  root.querySelectorAll("pre code").forEach((codeBlock) => {
+    const language = getCodeLanguageLabel(codeBlock);
+    if (!language) {
+      return;
+    }
+
+    const pre = codeBlock.closest("pre");
+    if (!pre || pre.querySelector(".code-language-label")) {
+      return;
+    }
+
+    pre.classList.add("code-block");
+    const label = document.createElement("span");
+    label.className = "code-language-label";
+    label.textContent = language;
+    pre.append(label);
+  });
+}
+
 async function loadArticle(post, expectedRunId = syncViewRun) {
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = false;
@@ -947,6 +1176,9 @@ async function loadArticle(post, expectedRunId = syncViewRun) {
   const isResume = post.tab === "resume";
   if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   articleContentEl.innerHTML = "";
+  articleDetailViewEl.classList.remove("has-toc");
+  if (articleTocEl) { articleTocEl.hidden = true; }
+  if (articleTocListEl) { articleTocListEl.innerHTML = ""; }
   contentMetaEl.hidden = isResume;
   backButtonEl.hidden = true;
 
@@ -969,8 +1201,11 @@ async function loadArticle(post, expectedRunId = syncViewRun) {
 
     renderArticleMeta(post);
     articleContentEl.innerHTML = marked.parse(markdown);
+    applyInlineHighlights(articleContentEl);
     applyInlineTooltips(articleContentEl, tooltipGlossary);
     articleContentEl.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
+    decorateCodeBlocks(articleContentEl);
+    renderArticleToc(post);
     if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   } catch (error) {
     if (expectedRunId !== syncViewRun) {
@@ -978,6 +1213,7 @@ async function loadArticle(post, expectedRunId = syncViewRun) {
     }
 
     if (articleLoadingEl) { articleLoadingEl.hidden = true; }
+    if (articleTocEl) { articleTocEl.hidden = true; }
     articleContentEl.innerHTML = `
       <div class="detail-error">
         <h3>内容加载失败</h3>
@@ -995,6 +1231,8 @@ function showArchiveOnly(currentTab, filteredPosts) {
 
   renderList(currentTab, filteredPosts, "");
   articleDetailViewEl.hidden = true;
+  articleDetailViewEl.classList.remove("has-toc");
+  if (articleTocEl) { articleTocEl.hidden = true; }
   backButtonEl.hidden = true;
   contentMetaEl.hidden = false;
 
@@ -1008,9 +1246,12 @@ async function showWelcome(expectedRunId = syncViewRun) {
   if (welcomeViewEl) { welcomeViewEl.hidden = false; }
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = true;
+  articleDetailViewEl.classList.remove("has-toc");
   backButtonEl.hidden = true;
   contentMetaEl.hidden = false;
   articleContentEl.innerHTML = "";
+  if (articleTocEl) { articleTocEl.hidden = true; }
+  if (articleTocListEl) { articleTocListEl.innerHTML = ""; }
   if (articleEmptyEl) { articleEmptyEl.hidden = true; }
   renderActivityGrid();
   await renderSkillDiamond(expectedRunId);

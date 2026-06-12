@@ -4,13 +4,21 @@
       "text": "#7c3aed",
       "background": "rgba(124, 58, 237, 0.12)",
       "border": "rgba(124, 58, 237, 0.22)",
-      "glow": "rgba(124, 58, 237, 0.14)"
+      "glow": "rgba(124, 58, 237, 0.14)",
+      "activeText": "#ffffff",
+      "activeBackground": "#7c3aed",
+      "activeBorder": "rgba(124, 58, 237, 0.32)",
+      "activeGlow": "rgba(124, 58, 237, 0.16)"
     },
     "dark": {
       "text": "#ddd6fe",
       "background": "rgba(167, 139, 250, 0.18)",
       "border": "rgba(221, 214, 254, 0.28)",
-      "glow": "rgba(167, 139, 250, 0.2)"
+      "glow": "rgba(167, 139, 250, 0.2)",
+      "activeText": "#24113f",
+      "activeBackground": "#ede9fe",
+      "activeBorder": "rgba(221, 214, 254, 0.38)",
+      "activeGlow": "rgba(255, 255, 255, 0.16)"
     }
   },
   "代码": {
@@ -18,13 +26,21 @@
       "text": "#047857",
       "background": "rgba(4, 120, 87, 0.12)",
       "border": "rgba(4, 120, 87, 0.2)",
-      "glow": "rgba(4, 120, 87, 0.12)"
+      "glow": "rgba(4, 120, 87, 0.12)",
+      "activeText": "#ffffff",
+      "activeBackground": "#047857",
+      "activeBorder": "rgba(4, 120, 87, 0.3)",
+      "activeGlow": "rgba(16, 185, 129, 0.16)"
     },
     "dark": {
       "text": "#a7f3d0",
       "background": "rgba(16, 185, 129, 0.16)",
       "border": "rgba(167, 243, 208, 0.26)",
-      "glow": "rgba(16, 185, 129, 0.18)"
+      "glow": "rgba(16, 185, 129, 0.18)",
+      "activeText": "#06281d",
+      "activeBackground": "#d1fae5",
+      "activeBorder": "rgba(167, 243, 208, 0.34)",
+      "activeGlow": "rgba(255, 255, 255, 0.16)"
     }
   }
 }
