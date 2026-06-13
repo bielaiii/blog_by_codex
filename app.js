@@ -13,11 +13,12 @@ const tabDescriptions = {
 const tooltipGlossaryPath = "posts/tooltips.json";
 const skillsPath = "data/skills.json";
 const siteConfigPath = "data/site-config.json";
+const postsPath = "data/posts.json";
 const postMetadataPath = "data/post-metadata.json";
 const tagStylesPath = "data/tag-styles.json";
 const highlightStylesPath = "data/highlight-styles.json";
 
-const posts = [
+let posts = [
   {
     slug: "resume-profile",
     tab: "resume",
@@ -89,6 +90,7 @@ let pendingRestoreTab = "";
 let tooltipGlossaryPromise;
 let skillsPromise;
 let siteConfigPromise;
+let postsPromise;
 let postMetadataPromise;
 let tagStylesPromise;
 let highlightStylesPromise;
@@ -105,6 +107,7 @@ let tagFilterTouched = false;
 let activeArticleTags = new Set();
 let articleSearchQuery = "";
 let syncViewRun = 0;
+let timelineScrollFrame = 0;
 const postSearchTextCache = new Map();
 
 const tabsEls = [...document.querySelectorAll(".tab")];
@@ -264,6 +267,21 @@ async function getSiteConfig() {
   return siteConfigPromise;
 }
 
+async function getPostsConfig() {
+  if (!postsPromise) {
+    postsPromise = (async () => {
+      try {
+        const response = await fetch(postsPath);
+        return response.ok ? await response.json() : posts;
+      } catch (error) {
+        return posts;
+      }
+    })();
+  }
+
+  return postsPromise;
+}
+
 async function getPostMetadata() {
   if (!postMetadataPromise) {
     postMetadataPromise = (async () => {
@@ -314,6 +332,7 @@ async function initializeSiteConfig() {
     ...siteConfig,
     ...(await getSiteConfig())
   };
+  posts = await getPostsConfig();
 
   if (siteConfig.dateSource === "generated") {
     postMetadata = await getPostMetadata();
@@ -829,6 +848,7 @@ function updateReadingLayout(tab, slug) {
 
   workspaceEl.classList.toggle("is-reading-detail", isReadingDetail);
   workspaceEl.classList.toggle("is-single-column", isSingleColumn);
+  workspaceEl.classList.toggle("is-article-list", showTimeline);
   timelinePanelEl.hidden = !showTimeline;
   if (tagFilterPanelEl) {
     tagFilterPanelEl.hidden = !showTimeline;
@@ -859,6 +879,7 @@ function renderList(currentTab, filteredPosts, currentSlug) {
       const searchSnippet = currentTab === "articles" ? buildSearchSnippet(post) : "";
       return `
         <a class="archive-card ${post.slug === currentSlug ? "is-active" : ""}" href="#tab=${currentTab}&post=${post.slug}">
+          <span class="archive-anchor" data-slug="${escapeHtml(post.slug)}"></span>
           ${shouldShowArticleDates() ? `<p class="archive-date">${formatDate(getPostDate(post))}</p>` : ""}
           <h3 class="archive-title">${escapeHtml(post.title)}</h3>
           ${searchSnippet
@@ -872,7 +893,10 @@ function renderList(currentTab, filteredPosts, currentSlug) {
 
 function renderTimeline(currentTab, currentSlug, visiblePosts = getPostsByTab(currentTab)) {
   const filteredPosts = visiblePosts;
+  const showTimelineTitles = currentTab !== "articles";
+  timelinePanelEl.classList.toggle("is-article-timeline", currentTab === "articles");
   timelineHeadingEl.textContent = tabs[currentTab];
+  timelineHeadingEl.hidden = !showTimelineTitles;
 
   if (!filteredPosts.length) {
     timelineEl.innerHTML = '<p class="timeline-empty">这里还没有条目。</p>';
@@ -883,23 +907,101 @@ function renderTimeline(currentTab, currentSlug, visiblePosts = getPostsByTab(cu
 
   timelineEl.innerHTML = filteredPosts
     .map((post, index) => {
-      const distance = Math.abs(index - activeIndex);
-      const emphasisClass = distance === 0
-        ? "is-current"
-        : distance === 1
-          ? "is-near"
-          : distance === 2
-            ? "is-far"
-            : "is-faded";
+      const content = `
+        ${shouldShowTimelineDates() ? `<span class="timeline-entry-date">${formatDate(currentTab === "articles" ? post.date : getPostDate(post))}</span>` : ""}
+        ${showTimelineTitles ? `<span class="timeline-entry-title">${escapeHtml(post.title)}</span>` : ""}
+      `;
+
+      if (currentTab === "articles") {
+        return `
+          <button class="timeline-entry" type="button" data-slug="${escapeHtml(post.slug)}">
+            ${content}
+          </button>
+        `;
+      }
 
       return `
-        <a class="timeline-entry ${emphasisClass}" href="#tab=${currentTab}&post=${post.slug}">
-          ${shouldShowTimelineDates() ? `<span class="timeline-entry-date">${formatDate(getPostDate(post))}</span>` : ""}
-          <span class="timeline-entry-title">${escapeHtml(post.title)}</span>
+        <a class="timeline-entry" href="#tab=${currentTab}&post=${post.slug}">
+          ${content}
         </a>
       `;
     })
     .join("");
+
+  if (currentTab === "articles") {
+    initializeScrollableTimeline(activeIndex);
+  } else {
+    updateTimelineEmphasis(activeIndex);
+  }
+}
+
+function updateTimelineEmphasis(activeIndex = 0) {
+  [...timelineEl.querySelectorAll(".timeline-entry")].forEach((entry, index) => {
+    const distance = Math.abs(index - activeIndex);
+    entry.classList.toggle("is-current", distance === 0);
+    entry.classList.toggle("is-near", distance === 1);
+    entry.classList.toggle("is-far", distance === 2);
+    entry.classList.toggle("is-faded", distance > 2);
+  });
+}
+
+function updateScrollableTimelineEmphasis() {
+  const entries = [...timelineEl.querySelectorAll(".timeline-entry")];
+  if (!entries.length) {
+    return;
+  }
+
+  const timelineRect = timelineEl.getBoundingClientRect();
+  if (timelineEl.scrollTop <= 1) {
+    updateTimelineEmphasis(0);
+    return;
+  }
+
+  const centerY = timelineRect.top + timelineRect.height / 2;
+  let activeIndex = 0;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  entries.forEach((entry, index) => {
+    const rect = entry.getBoundingClientRect();
+    const distance = Math.abs(rect.top + rect.height / 2 - centerY);
+    if (distance < closestDistance) {
+      activeIndex = index;
+      closestDistance = distance;
+    }
+  });
+
+  updateTimelineEmphasis(activeIndex);
+}
+
+function initializeScrollableTimeline(activeIndex = 0) {
+  const entries = [...timelineEl.querySelectorAll(".timeline-entry")];
+  if (!entries.length) {
+    return;
+  }
+
+  updateTimelineEmphasis(0);
+  requestAnimationFrame(() => {
+    timelineEl.scrollTop = 0;
+    updateScrollableTimelineEmphasis();
+  });
+}
+
+function scrollArchiveToPost(slug) {
+  if (!slug) {
+    return;
+  }
+
+  const target = articleListEl.querySelector(`.archive-anchor[data-slug="${CSS.escape(slug)}"]`)?.closest(".archive-card");
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  articleListEl.querySelectorAll(".archive-card.is-timeline-target").forEach((card) => {
+    card.classList.remove("is-timeline-target");
+  });
+  target.classList.add("is-timeline-target");
+  window.setTimeout(() => target.classList.remove("is-timeline-target"), 1200);
 }
 
 function renderTagFilters() {
@@ -994,7 +1096,7 @@ function renderArticleToc(post) {
     return;
   }
 
-  if (post.tab === "resume") {
+  if (post.tab === "resume" || post.layout === "two-column") {
     articleDetailViewEl.classList.remove("has-toc");
     articleTocEl.hidden = true;
     articleTocListEl.innerHTML = "";
@@ -1151,21 +1253,79 @@ function getCodeLanguageLabel(codeBlock) {
 function decorateCodeBlocks(root) {
   root.querySelectorAll("pre code").forEach((codeBlock) => {
     const language = getCodeLanguageLabel(codeBlock);
-    if (!language) {
-      return;
-    }
-
     const pre = codeBlock.closest("pre");
-    if (!pre || pre.querySelector(".code-language-label")) {
+    if (!pre || pre.classList.contains("code-block")) {
       return;
     }
 
     pre.classList.add("code-block");
-    const label = document.createElement("span");
-    label.className = "code-language-label";
-    label.textContent = language;
-    pre.append(label);
+
+    if (language) {
+      const label = document.createElement("span");
+      label.className = "code-language-label";
+      label.textContent = language;
+      pre.append(label);
+    }
+
+    const toggle = document.createElement("button");
+    toggle.className = "code-collapse-button";
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", "true");
+    toggle.setAttribute("aria-label", "折叠代码块");
+    toggle.title = "折叠代码块";
+    toggle.textContent = "⌃";
+    toggle.addEventListener("click", () => {
+      const isCollapsed = pre.classList.toggle("is-collapsed");
+      toggle.setAttribute("aria-expanded", String(!isCollapsed));
+      toggle.setAttribute("aria-label", isCollapsed ? "展开代码块" : "折叠代码块");
+      toggle.title = isCollapsed ? "展开代码块" : "折叠代码块";
+      toggle.textContent = isCollapsed ? "⌄" : "⌃";
+    });
+    pre.append(toggle);
   });
+}
+
+function renderMarkdownBody(markdown, post) {
+  articleContentEl.classList.toggle("is-two-column", post.layout === "two-column");
+
+  if (post.layout !== "two-column") {
+    articleContentEl.innerHTML = marked.parse(markdown);
+    return;
+  }
+
+  const rowParts = markdown.split(/\n\s*<!--\s*row\s*-->\s*\n/i);
+  const intro = rowParts.shift()?.trim() || "";
+  const rowHtml = rowParts
+    .map((rowSource) => {
+      const [leftSource, ...rightParts] = rowSource.split(/\n\s*<!--\s*column\s*-->\s*\n/i);
+      const rightSource = rightParts.join("\n<!-- column -->\n");
+
+      if (!leftSource?.trim() || !rightSource.trim()) {
+        return `
+          <section class="article-row article-row-full">
+            ${marked.parse(rowSource.trim())}
+          </section>
+        `;
+      }
+
+      return `
+        <section class="article-row article-row-pair">
+          <div class="article-column article-column-left">${marked.parse(leftSource.trim())}</div>
+          <div class="article-column article-column-right">${marked.parse(rightSource.trim())}</div>
+        </section>
+      `;
+    })
+    .join("");
+
+  if (!rowHtml.trim()) {
+    articleContentEl.innerHTML = marked.parse(markdown);
+    return;
+  }
+
+  articleContentEl.innerHTML = `
+    ${intro ? `<section class="article-row article-row-full">${marked.parse(intro)}</section>` : ""}
+    ${rowHtml}
+  `;
 }
 
 async function loadArticle(post, expectedRunId = syncViewRun) {
@@ -1176,7 +1336,9 @@ async function loadArticle(post, expectedRunId = syncViewRun) {
   const isResume = post.tab === "resume";
   if (articleLoadingEl) { articleLoadingEl.hidden = true; }
   articleContentEl.innerHTML = "";
+  articleContentEl.classList.remove("is-two-column");
   articleDetailViewEl.classList.remove("has-toc");
+  articleDetailViewEl.classList.toggle("is-two-column", post.layout === "two-column");
   if (articleTocEl) { articleTocEl.hidden = true; }
   if (articleTocListEl) { articleTocListEl.innerHTML = ""; }
   contentMetaEl.hidden = isResume;
@@ -1200,7 +1362,7 @@ async function loadArticle(post, expectedRunId = syncViewRun) {
     }
 
     renderArticleMeta(post);
-    articleContentEl.innerHTML = marked.parse(markdown);
+    renderMarkdownBody(markdown, post);
     applyInlineHighlights(articleContentEl);
     applyInlineTooltips(articleContentEl, tooltipGlossary);
     articleContentEl.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
@@ -1232,6 +1394,7 @@ function showArchiveOnly(currentTab, filteredPosts) {
   renderList(currentTab, filteredPosts, "");
   articleDetailViewEl.hidden = true;
   articleDetailViewEl.classList.remove("has-toc");
+  articleDetailViewEl.classList.remove("is-two-column");
   if (articleTocEl) { articleTocEl.hidden = true; }
   backButtonEl.hidden = true;
   contentMetaEl.hidden = false;
@@ -1247,6 +1410,7 @@ async function showWelcome(expectedRunId = syncViewRun) {
   articleListViewEl.hidden = true;
   articleDetailViewEl.hidden = true;
   articleDetailViewEl.classList.remove("has-toc");
+  articleDetailViewEl.classList.remove("is-two-column");
   backButtonEl.hidden = true;
   contentMetaEl.hidden = false;
   articleContentEl.innerHTML = "";
@@ -1369,6 +1533,30 @@ if (edgeBackButtonEl) {
     setHash(tab);
   });
 }
+
+timelineEl.addEventListener("scroll", () => {
+  if (!timelinePanelEl.classList.contains("is-article-timeline")) {
+    return;
+  }
+
+  if (timelineScrollFrame) {
+    cancelAnimationFrame(timelineScrollFrame);
+  }
+
+  timelineScrollFrame = requestAnimationFrame(() => {
+    timelineScrollFrame = 0;
+    updateScrollableTimelineEmphasis();
+  });
+}, { passive: true });
+
+timelineEl.addEventListener("click", (event) => {
+  const entry = event.target.closest(".timeline-entry");
+  if (!entry || !timelinePanelEl.classList.contains("is-article-timeline")) {
+    return;
+  }
+
+  scrollArchiveToPost(entry.dataset.slug);
+});
 
 if (articleSearchEl) {
   articleSearchEl.addEventListener("input", () => {

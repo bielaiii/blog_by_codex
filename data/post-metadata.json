@@ -1,18 +1,28 @@
 {
   "Hillis-Steele_scan": {
     "file": "posts/Hillis-Steele_scan.md",
-    "createdAt": "2026-06-12T10:07:52.809Z",
-    "updatedAt": "2026-06-12T10:07:52.809Z"
+    "createdAt": "2026-06-12T19:06:31+08:00",
+    "updatedAt": "2026-06-12T19:06:31+08:00"
   },
   "code-snippet-demo": {
     "file": "posts/code-snippet-demo.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
-    "updatedAt": "2026-03-28T17:14:43+08:00"
+    "updatedAt": "2026-06-12T19:06:31+08:00"
   },
   "first-post": {
     "file": "posts/first-post.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
     "updatedAt": "2026-05-14T01:45:07+08:00"
+  },
+  "layout_features_demo": {
+    "file": "posts/layout_features_demo.md",
+    "createdAt": "2026-06-13T19:31:34.807Z",
+    "updatedAt": "2026-06-13T19:31:34.807Z"
+  },
+  "parallel_primitives": {
+    "file": "posts/parallel_primitives.md",
+    "createdAt": "2026-06-12T19:06:31+08:00",
+    "updatedAt": "2026-06-12T19:44:32+08:00"
   },
   "project-blueprint": {
     "file": "posts/project-blueprint.md",
@@ -24,10 +34,15 @@
     "createdAt": "2026-03-29T15:55:53+08:00",
     "updatedAt": "2026-03-29T17:08:18+08:00"
   },
+  "segmented_op": {
+    "file": "posts/segmented_op.md",
+    "createdAt": "2026-06-12T19:06:31+08:00",
+    "updatedAt": "2026-06-12T19:44:32+08:00"
+  },
   "why_tree_reduction_and_scan_work": {
     "file": "posts/why_tree_reduction_and_scan_work.md",
-    "createdAt": "2026-06-12T10:07:52.862Z",
-    "updatedAt": "2026-06-12T10:07:52.862Z"
+    "createdAt": "2026-06-12T19:06:31+08:00",
+    "updatedAt": "2026-06-12T19:06:31+08:00"
   },
   "writing-workflow": {
     "file": "posts/writing-workflow.md",

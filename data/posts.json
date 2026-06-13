@@ -1,0 +1,136 @@
+[
+  {
+    "slug": "layout_features_demo",
+    "tab": "articles",
+    "title": "博客文章效果与语法演示",
+    "date": "2026-06-14",
+    "summary": "集中展示两列对照布局、代码块折叠、行内高亮、术语提示和表格等文章写法。",
+    "tags": [
+      "Markdown",
+      "语法",
+      "示例"
+    ],
+    "layout": "two-column",
+    "file": "posts/layout_features_demo.md"
+  },
+  {
+    "slug": "parallel_primitives",
+    "tab": "articles",
+    "title": "cuda常用parallel primitives操作",
+    "date": "2026-06-14",
+    "summary": "整理 CUDA 中常见的 parallel primitives：reduce、scan、stencil、gather、scatter、sort、map、partition、compact 等操作。",
+    "tags": [
+      "CUDA",
+      "并行算法"
+    ],
+    "layout": "single",
+    "file": "posts/parallel_primitives.md"
+  },
+  {
+    "slug": "segmented_op",
+    "tab": "articles",
+    "title": "segmented operation",
+    "date": "2026-06-14",
+    "summary": "用 inclusive segmented scan 的 CUDA 示例理解 head flag 如何传播，以及为什么每个线程能在不跨段的情况下累计前缀和。",
+    "tags": [
+      "CUDA",
+      "并行算法",
+      "Scan"
+    ],
+    "layout": "single",
+    "file": "posts/segmented_op.md"
+  },
+  {
+    "slug": "Hillis-Steele_scan",
+    "tab": "articles",
+    "title": "Hillis-Steele scan",
+    "date": "2026-06-12",
+    "summary": "用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。",
+    "tags": [
+      "CUDA",
+      "并行算法",
+      "Scan"
+    ],
+    "layout": "single",
+    "file": "posts/Hillis-Steele_scan.md"
+  },
+  {
+    "slug": "why_tree_reduction_and_scan_work",
+    "tab": "articles",
+    "title": "为什么 reduce 和 scan 能刚好处理数组",
+    "date": "2026-06-12",
+    "summary": "从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。",
+    "tags": [
+      "并行算法",
+      "Reduction",
+      "Scan"
+    ],
+    "layout": "single",
+    "file": "posts/why_tree_reduction_and_scan_work.md"
+  },
+  {
+    "slug": "resume-profile",
+    "tab": "resume",
+    "title": "个人简历",
+    "date": "2026-03-29",
+    "summary": "",
+    "tags": [],
+    "layout": "single",
+    "file": "posts/resume-profile.md"
+  },
+  {
+    "slug": "first-post",
+    "tab": "articles",
+    "title": "把个人博客搭成一个长期写作入口",
+    "date": "2026-03-28",
+    "summary": "从结构、样式和部署方式出发，建立一个能长期维护的静态博客。文章归档页先显示标题和预览，点进去再阅读完整内容。",
+    "tags": [
+      "博客",
+      "GitHub Pages",
+      "Markdown"
+    ],
+    "layout": "single",
+    "file": "posts/first-post.md"
+  },
+  {
+    "slug": "project-blueprint",
+    "tab": "projects",
+    "title": "个人项目页应该像一个实时项目档案",
+    "date": "2026-03-24",
+    "summary": "项目不仅展示结果，也展示阶段、状态和下一步。归档页先看简介，点开后再看完整项目笔记，更符合 dashboard 的浏览节奏。",
+    "tags": [
+      "项目",
+      "Dashboard",
+      "设计"
+    ],
+    "layout": "single",
+    "file": "posts/project-blueprint.md"
+  },
+  {
+    "slug": "code-snippet-demo",
+    "tab": "articles",
+    "title": "Markdown 与代码高亮的展示示例",
+    "date": "2026-03-20",
+    "summary": "这篇文章用来验证标题、列表、引用、表格和代码块等常见内容的展示效果，也适合演示分享型文章的归档样式。",
+    "tags": [
+      "Markdown",
+      "代码",
+      "示例"
+    ],
+    "layout": "single",
+    "file": "posts/code-snippet-demo.md"
+  },
+  {
+    "slug": "writing-workflow",
+    "tab": "articles",
+    "title": "给持续写作保留一点轻量流程",
+    "date": "2026-03-12",
+    "summary": "文章越容易落地，博客越容易持续更新。流程轻一点，内容反而更稳定，也更适合放进个人文章归档。",
+    "tags": [
+      "写作",
+      "流程"
+    ],
+    "layout": "single",
+    "file": "posts/writing-workflow.md"
+  }
+]

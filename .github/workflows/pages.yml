@@ -28,7 +28,9 @@ jobs:
           fetch-depth: 0
 
       - name: Generate post metadata
-        run: node scripts/generate-post-metadata.js
+        run: |
+          node scripts/generate-posts.js
+          node scripts/generate-post-metadata.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

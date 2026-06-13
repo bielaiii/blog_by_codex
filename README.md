@@ -35,7 +35,14 @@
 - `posts/my-new-post.md`
 - `posts/my-project-note.md`
 
-然后在 `app.js` 里的 `posts` 数组增加一条：
+然后运行：
+
+```bash
+node scripts/generate-posts.js
+node scripts/generate-post-metadata.js
+```
+
+页面会读取自动生成的 `data/posts.json`。如果你需要给文章改标题、摘要、标签或栏目，可以在 `scripts/generate-posts.js` 的 `overrides` 里补一条配置：
 
 ```js
 {
@@ -74,6 +81,36 @@
 ## 文章目录
 
 文章详情页会根据正文里的 `##` 和 `###` 自动生成目录，显示在正文左侧。窄屏下目录会移动到正文上方。
+
+## 文章布局
+
+默认文章是单列阅读。需要整篇文章使用左右两列时，在 `scripts/generate-posts.js` 的 `overrides` 里给文章加：
+
+```js
+layout: "two-column"
+```
+
+然后在 Markdown 里用标准 HTML 注释标记每一组左右对照：
+
+```md
+<!-- row -->
+
+左侧这一组内容，可以放图、示意、数据变化过程。
+
+<!-- column -->
+
+右侧这一组内容，可以放对应代码、解析、推导。
+
+<!-- row -->
+
+下一组左侧内容。
+
+<!-- column -->
+
+下一组右侧内容。
+```
+
+没有配置 `layout` 时会继续使用单列。
 
 ## 行内背景高亮
 
@@ -189,6 +226,7 @@ tags: ["Markdown", "代码"]
 本仓库已经包含 GitHub Pages workflow。每次 push 到 `master` 时，会自动运行生成脚本并部署静态站点；本地需要手动刷新生成文件时，可以运行：
 
 ```bash
+node scripts/generate-posts.js
 node scripts/generate-post-metadata.js
 ```
 
