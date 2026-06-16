@@ -35,26 +35,42 @@
 - `posts/my-new-post.md`
 - `posts/my-project-note.md`
 
-然后运行：
+也可以用脚本创建：
+
+```bash
+node scripts/new-post.js "我的新文章" --tags CUDA,Scan
+```
+
+创建草稿：
+
+```bash
+node scripts/new-post.js "还没写完的文章" --draft
+```
+
+脚本会生成 Markdown 文件，并刷新 `data/posts.json` 与 `data/post-metadata.json`。
+
+如果你手动新增或修改文章元信息，可以运行：
 
 ```bash
 node scripts/generate-posts.js
 node scripts/generate-post-metadata.js
 ```
 
-页面会读取自动生成的 `data/posts.json`。如果你需要给文章改标题、摘要、标签或栏目，可以在 `scripts/generate-posts.js` 的 `overrides` 里补一条配置：
+文章可以在文件开头写 frontmatter：
 
-```js
-{
-  slug: "my-new-post",
-  tab: "resume",
-  title: "我的新文章",
-  date: "2026-03-28",
-  summary: "这里写归档页显示的预览文字，建议 2 到 3 行长度。",
-  tags: ["随笔", "设计"],
-  file: "posts/my-new-post.md"
-}
+```md
+---
+title: "我的新文章"
+date: 2026-06-14
+summary: "这里写归档页显示的预览文字。"
+tags: ["CUDA", "Scan"]
+tab: articles
+layout: single
+draft: false
+---
 ```
+
+页面会读取自动生成的 `data/posts.json`。如果你需要集中覆盖标题、摘要、标签或栏目，可以在 `scripts/generate-posts.js` 的 `overrides` 里补配置。
 
 ## 草稿和隐藏文章
 
@@ -73,7 +89,7 @@ node scripts/generate-post-metadata.js
 }
 ```
 
-- `draft: true`：草稿，不出现在归档、搜索、时间轴和首页更新格子图里。
+- `draft: true`：草稿。部署时不会进入公开 `data/posts.json`；本地用 `INCLUDE_DRAFTS=true node scripts/generate-posts.js` 可以预览。
 - `hidden: true` 或 `visible: false`：隐藏文章，效果同草稿。
 
 直接访问被隐藏文章的链接时，页面会回到对应栏目的归档列表。
@@ -111,6 +127,31 @@ layout: "two-column"
 ```
 
 没有配置 `layout` 时会继续使用单列。
+
+## Mermaid 图
+
+文章支持 Mermaid，适合快速画流程图、依赖图和状态图：
+
+````md
+```mermaid
+graph LR
+  A[输入数组] --> B[offset = 1]
+  B --> C[offset = 2]
+  C --> D[输出]
+```
+````
+
+Mermaid 适合表达结构关系；如果需要精确几何控制，建议用 LaTeX/TikZ 或 SVG 图片。
+
+## 部署前检查
+
+推送前可以运行：
+
+```bash
+node scripts/check-site.js
+```
+
+它会检查文章文件、重复 slug、两列文章的 `row/column` 标记、空 Mermaid 块和失效本地图片引用。
 
 ## 行内背景高亮
 

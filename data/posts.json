@@ -1,5 +1,83 @@
 [
   {
+    "slug": "async_io_frame",
+    "tab": "projects",
+    "title": "async_io_framework",
+    "date": "2026-06-15",
+    "summary": "一个基于 C++20 coroutine 与 Linux epoll 的异步 I/O 框架，已经覆盖 connect、accept、read/write、timer、timeout 与主动取消等核心路径。",
+    "tags": [
+      "C++",
+      "Coroutine",
+      "epoll",
+      "Async IO"
+    ],
+    "layout": "single",
+    "file": "posts/async_io_frame.md",
+    "stage": "架构主线已成型：Coroutine -> Operation -> Scheduler -> epoll/timerfd/eventfd",
+    "stack": [
+      "C++20",
+      "coroutine",
+      "epoll",
+      "timerfd",
+      "eventfd"
+    ],
+    "metrics": [
+      "async I/O runtime",
+      "timeout/cancel",
+      "event arbitration"
+    ],
+    "repo": "https://github.com/bielaiii/async_io_framework"
+  },
+  {
+    "slug": "gdb_cli_tools",
+    "tab": "projects",
+    "title": "gdb-agent",
+    "date": "2026-06-15",
+    "summary": "一个 vibe-coding 推出来的 GDB/MI 调试执行层，把调试动作、会话状态和证据资产组织成可审计的 evidence flow。",
+    "tags": [
+      "C++",
+      "GDB",
+      "Debugging",
+      "Vibe Coding"
+    ],
+    "layout": "single",
+    "file": "posts/gdb_cli_tools.md",
+    "stage": "架构主线已成型：Vibe Coding Loop -> Session -> Action -> Evidence -> Report",
+    "stack": [
+      "C++20",
+      "GDB/MI",
+      "daemon",
+      "JSONL",
+      "Markdown"
+    ],
+    "metrics": [
+      "vibe-coding",
+      "evidence flow",
+      "session runtime"
+    ],
+    "repo": "https://github.com/bielaiii/gdb_cli_tools"
+  },
+  {
+    "slug": "layout-features-demo",
+    "tab": "articles",
+    "title": "博客文章效果与语法演示",
+    "date": "2026-06-15",
+    "summary": "这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 <! row 是一组左右对照，组内用 <! column 分隔左侧和右侧。 <! row 左侧可以放概念、图示、过程说明，右侧放对应代码或解...",
+    "tags": [],
+    "layout": "single",
+    "file": "posts/layout-features-demo.md"
+  },
+  {
+    "slug": "segmented-op",
+    "tab": "articles",
+    "title": "segmented operation",
+    "date": "2026-06-15",
+    "summary": "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5",
+    "tags": [],
+    "layout": "single",
+    "file": "posts/segmented-op.md"
+  },
+  {
     "slug": "layout_features_demo",
     "tab": "articles",
     "title": "博客文章效果与语法演示",

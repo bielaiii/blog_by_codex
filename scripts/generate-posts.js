@@ -71,6 +71,55 @@ const overrides = {
   }
 };
 
+function parseScalar(value) {
+  const trimmed = String(value || "").trim();
+  if (trimmed === "true") {
+    return true;
+  }
+  if (trimmed === "false") {
+    return false;
+  }
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+function parseFrontmatter(markdown) {
+  const match = String(markdown || "").match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!match) {
+    return { metadata: {}, body: markdown };
+  }
+
+  const metadata = {};
+  const lines = match[1].split(/\r?\n/);
+
+  lines.forEach((line) => {
+    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!pair) {
+      return;
+    }
+
+    const key = pair[1];
+    const rawValue = pair[2].trim();
+    if (rawValue.startsWith("[") && rawValue.endsWith("]")) {
+      metadata[key] = rawValue
+        .slice(1, -1)
+        .split(",")
+        .map((item) => parseScalar(item))
+        .filter(Boolean);
+      return;
+    }
+
+    metadata[key] = parseScalar(rawValue);
+  });
+
+  return {
+    metadata,
+    body: markdown.slice(match[0].length)
+  };
+}
+
 function stripMarkdown(value) {
   return String(value || "")
     .replace(/```[\s\S]*?```/g, " ")
@@ -105,22 +154,31 @@ const posts = fs.readdirSync(postsDir)
     const slug = path.basename(fileName, ".md");
     const file = path.posix.join("posts", fileName);
     const markdown = fs.readFileSync(path.join(postsDir, fileName), "utf8");
+    const { metadata, body } = parseFrontmatter(markdown);
     const override = overrides[slug] || {};
+    const config = { ...metadata, ...override };
 
     return {
       slug,
-      tab: override.tab || "articles",
-      title: override.title || getTitle(markdown, slug),
-      date: override.date || new Date().toISOString().slice(0, 10),
-      summary: override.summary ?? getSummary(markdown),
-      tags: override.tags || [],
-      layout: override.layout || "single",
+      tab: config.tab || "articles",
+      title: config.title || getTitle(body, slug),
+      date: config.date || new Date().toISOString().slice(0, 10),
+      summary: config.summary ?? getSummary(body),
+      tags: Array.isArray(config.tags) ? config.tags : [],
+      layout: config.layout || "single",
       file,
-      ...(override.draft ? { draft: true } : {}),
-      ...(override.hidden ? { hidden: true } : {}),
-      ...(override.visible === false ? { visible: false } : {})
+      ...(config.status ? { status: config.status } : {}),
+      ...(config.stage ? { stage: config.stage } : {}),
+      ...(config.stack ? { stack: Array.isArray(config.stack) ? config.stack : [config.stack] } : {}),
+      ...(config.metrics ? { metrics: Array.isArray(config.metrics) ? config.metrics : [config.metrics] } : {}),
+      ...(config.demo ? { demo: config.demo } : {}),
+      ...(config.repo ? { repo: config.repo } : {}),
+      ...(config.draft ? { draft: true } : {}),
+      ...(config.hidden ? { hidden: true } : {}),
+      ...(config.visible === false ? { visible: false } : {})
     };
   })
+  .filter((post) => process.env.INCLUDE_DRAFTS === "true" || !post.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

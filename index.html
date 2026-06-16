@@ -31,7 +31,7 @@
         </svg>
       </button>
       <div class="brand-block">
-        <p class="brand-eyebrow">White Archive</p>
+        <p class="brand-eyebrow" title="小声说：这座档案馆也有 Codex 的指纹。">White Archive</p>
         <h1>把写作、分享与项目整理成一张个人看板</h1>
       </div>
       <nav class="tabs-wrap" aria-label="内容分类">
@@ -101,6 +101,7 @@
             <p id="list-description" class="section-copy">这里只显示标题和预览，点击卡片后进入完整文章。</p>
           </div>
           <div id="article-list" class="article-list" aria-live="polite"></div>
+          <nav id="archive-pagination" class="archive-pagination" aria-label="归档分页"></nav>
         </section>
 
         <section id="article-detail-view" class="article-detail-view" hidden>
@@ -147,6 +148,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-  <script src="app.js?v=20260614-02" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="app.js?v=20260615-02" type="module"></script>
 </body>
 </html>
