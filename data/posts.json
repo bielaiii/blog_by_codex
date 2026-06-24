@@ -1,5 +1,25 @@
 [
   {
+    "slug": "layout-features-demo",
+    "tab": "articles",
+    "title": "博客文章效果与语法演示",
+    "date": "2026-06-24",
+    "summary": "这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 <! row 是一组左右对照，组内用 <! column 分隔左侧和右侧。 <! row 左侧可以放概念、图示、过程说明，右侧放对应代码或解...",
+    "tags": [],
+    "layout": "single",
+    "file": "posts/layout-features-demo.md"
+  },
+  {
+    "slug": "segmented-op",
+    "tab": "articles",
+    "title": "segmented operation",
+    "date": "2026-06-24",
+    "summary": "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5",
+    "tags": [],
+    "layout": "single",
+    "file": "posts/segmented-op.md"
+  },
+  {
     "slug": "async_io_frame",
     "tab": "projects",
     "title": "async_io_framework",
@@ -56,26 +76,6 @@
       "session runtime"
     ],
     "repo": "https://github.com/bielaiii/gdb_cli_tools"
-  },
-  {
-    "slug": "layout-features-demo",
-    "tab": "articles",
-    "title": "博客文章效果与语法演示",
-    "date": "2026-06-15",
-    "summary": "这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 <! row 是一组左右对照，组内用 <! column 分隔左侧和右侧。 <! row 左侧可以放概念、图示、过程说明，右侧放对应代码或解...",
-    "tags": [],
-    "layout": "single",
-    "file": "posts/layout-features-demo.md"
-  },
-  {
-    "slug": "segmented-op",
-    "tab": "articles",
-    "title": "segmented operation",
-    "date": "2026-06-15",
-    "summary": "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5",
-    "tags": [],
-    "layout": "single",
-    "file": "posts/segmented-op.md"
   },
   {
     "slug": "layout_features_demo",

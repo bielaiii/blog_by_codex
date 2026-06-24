@@ -4,10 +4,20 @@
     "createdAt": "2026-06-12T19:06:31+08:00",
     "updatedAt": "2026-06-12T19:06:31+08:00"
   },
+  "any-block-reduce": {
+    "file": "posts/any-block-reduce.md",
+    "createdAt": "2026-06-24T09:06:31.392Z",
+    "updatedAt": "2026-06-24T09:06:31.392Z"
+  },
   "async_io_frame": {
     "file": "posts/async_io_frame.md",
-    "createdAt": "2026-06-15T07:26:37.773Z",
-    "updatedAt": "2026-06-15T07:26:37.773Z"
+    "createdAt": "2026-06-16T18:04:23+08:00",
+    "updatedAt": "2026-06-16T18:04:23+08:00"
+  },
+  "blelloch-scan": {
+    "file": "posts/blelloch-scan.md",
+    "createdAt": "2026-06-24T09:06:31.525Z",
+    "updatedAt": "2026-06-24T09:06:31.525Z"
   },
   "code-snippet-demo": {
     "file": "posts/code-snippet-demo.md",
@@ -21,18 +31,18 @@
   },
   "gdb_cli_tools": {
     "file": "posts/gdb_cli_tools.md",
-    "createdAt": "2026-06-15T07:26:37.795Z",
-    "updatedAt": "2026-06-15T07:26:37.795Z"
+    "createdAt": "2026-06-16T18:04:23+08:00",
+    "updatedAt": "2026-06-16T18:04:23+08:00"
   },
   "layout-features-demo": {
     "file": "posts/layout-features-demo.md",
-    "createdAt": "2026-06-15T07:26:37.804Z",
-    "updatedAt": "2026-06-15T07:26:37.804Z"
+    "createdAt": "2026-06-14T03:32:08+08:00",
+    "updatedAt": "2026-06-16T18:04:23+08:00"
   },
   "layout_features_demo": {
     "file": "posts/layout_features_demo.md",
     "createdAt": "2026-06-14T03:32:08+08:00",
-    "updatedAt": "2026-06-14T03:32:08+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00"
   },
   "parallel_primitives": {
     "file": "posts/parallel_primitives.md",
@@ -51,8 +61,8 @@
   },
   "segmented-op": {
     "file": "posts/segmented-op.md",
-    "createdAt": "2026-06-15T07:26:37.845Z",
-    "updatedAt": "2026-06-15T07:26:37.845Z"
+    "createdAt": "2026-06-12T19:06:31+08:00",
+    "updatedAt": "2026-06-16T18:04:23+08:00"
   },
   "segmented_op": {
     "file": "posts/segmented_op.md",
