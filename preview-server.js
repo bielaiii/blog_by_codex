@@ -4,6 +4,7 @@ const path = require('path');
 const { execFile, spawn } = require('child_process');
 const root = __dirname;
 const postsDir = path.join(root, 'posts');
+const snippetsDir = path.join(root, 'snippets');
 const port = Number(process.env.PORT) || 8000;
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -19,8 +20,70 @@ const mime = {
 };
 
 function sendJson(res, status, payload) {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store'
+  });
   res.end(JSON.stringify(payload));
+}
+
+function collectSnippetFiles(directory) {
+  if (!fs.existsSync(directory)) {
+    return [];
+  }
+
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return collectSnippetFiles(entryPath);
+    }
+    return entry.isFile() && path.extname(entry.name).toLowerCase() === '.json' ? [entryPath] : [];
+  });
+}
+
+function handleListSnippets(req, res) {
+  const snippets = [];
+  const warnings = [];
+
+  try {
+    for (const filePath of collectSnippetFiles(snippetsDir)) {
+      const source = path.relative(snippetsDir, filePath).split(path.sep).join('/');
+      let definitions;
+      try {
+        definitions = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      } catch (error) {
+        warnings.push(`${source}: ${error.message}`);
+        continue;
+      }
+
+      for (const [name, definition] of Object.entries(definitions || {})) {
+        const prefixes = (Array.isArray(definition?.prefix) ? definition.prefix : [definition?.prefix])
+          .map((prefix) => String(prefix || '').trim())
+          .filter(Boolean);
+        const body = Array.isArray(definition?.body)
+          ? definition.body.map((line) => String(line)).join('\n')
+          : String(definition?.body || '');
+        if (!prefixes.length || !body) {
+          warnings.push(`${source}: “${name}” 缺少 prefix 或 body`);
+          continue;
+        }
+        snippets.push({
+          id: `${source}:${name}`,
+          name,
+          kind: String(definition?.kind || 'Snippet'),
+          prefixes,
+          description: String(definition?.description || ''),
+          body,
+          source
+        });
+      }
+    }
+
+    snippets.sort((left, right) => left.name.localeCompare(right.name, 'zh-CN'));
+    sendJson(res, 200, { ok: true, snippets, warnings });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message || 'Failed to load snippets' });
+  }
 }
 
 function toSlug(value) {
@@ -44,12 +107,54 @@ function uniqueSlug(slug) {
 }
 
 function runGenerators(callback) {
-  execFile('node', ['scripts/generate-posts.js'], { cwd: root }, (postsErr) => {
+  const env = { ...process.env, INCLUDE_DRAFTS: 'true' };
+  execFile('node', ['scripts/generate-posts.js'], { cwd: root, env }, (postsErr) => {
     if (postsErr) {
       callback(postsErr);
       return;
     }
     execFile('node', ['scripts/generate-post-metadata.js'], { cwd: root }, callback);
+  });
+}
+
+function handleDeletePost(req, res) {
+  readRequestBody(req, (bodyErr, body) => {
+    if (bodyErr) {
+      sendJson(res, 400, { error: 'Failed to read request body' });
+      return;
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(body || '{}');
+    } catch (error) {
+      sendJson(res, 400, { error: 'Invalid JSON payload' });
+      return;
+    }
+
+    const slug = toSlug(payload.slug);
+    const filePath = path.join(postsDir, `${slug}.md`);
+    if (!payload.slug || !filePath.startsWith(postsDir)) {
+      sendJson(res, 403, { error: 'Forbidden path' });
+      return;
+    }
+
+    fs.unlink(filePath, (unlinkErr) => {
+      if (unlinkErr) {
+        sendJson(res, unlinkErr.code === 'ENOENT' ? 404 : 500, {
+          error: unlinkErr.code === 'ENOENT' ? 'Post not found' : 'Failed to delete post'
+        });
+        return;
+      }
+
+      runGenerators((generatorErr) => {
+        if (generatorErr) {
+          sendJson(res, 500, { error: 'Post deleted, but metadata generation failed' });
+          return;
+        }
+        sendJson(res, 200, { ok: true, slug });
+      });
+    });
   });
 }
 
@@ -262,6 +367,11 @@ function handleSavePost(req, res) {
 }
 
 const server = http.createServer((req, res) => {
+  if (req.method === 'GET' && (req.url || '').split('?')[0] === '/api/snippets') {
+    handleListSnippets(req, res);
+    return;
+  }
+
   if (req.method === 'POST' && (req.url || '').split('?')[0] === '/api/format-post') {
     handleFormatPost(req, res);
     return;
@@ -269,6 +379,11 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'POST' && (req.url || '').split('?')[0] === '/api/save-post') {
     handleSavePost(req, res);
+    return;
+  }
+
+  if (req.method === 'POST' && (req.url || '').split('?')[0] === '/api/delete-post') {
+    handleDeletePost(req, res);
     return;
   }
 
@@ -291,11 +406,24 @@ const server = http.createServer((req, res) => {
         return;
       }
       const ext = path.extname(filePath).toLowerCase();
-      res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
+      res.writeHead(200, {
+        'Content-Type': mime[ext] || 'application/octet-stream',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0'
+      });
       res.end(data);
     });
   });
 });
-server.listen(port, '127.0.0.1', () => {
-  console.log(`Preview server running at http://127.0.0.1:${port}`);
+runGenerators((generatorErr) => {
+  if (generatorErr) {
+    console.error(`Failed to prepare local post list: ${generatorErr.message}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`Preview server running at http://127.0.0.1:${port}`);
+  });
 });

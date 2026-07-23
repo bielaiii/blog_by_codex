@@ -6,8 +6,8 @@
   },
   "any-block-reduce": {
     "file": "posts/any-block-reduce.md",
-    "createdAt": "2026-06-24T09:06:31.392Z",
-    "updatedAt": "2026-06-24T09:06:31.392Z"
+    "createdAt": "2026-06-24T18:00:02+08:00",
+    "updatedAt": "2026-06-24T18:00:02+08:00"
   },
   "async_io_frame": {
     "file": "posts/async_io_frame.md",
@@ -16,8 +16,8 @@
   },
   "blelloch-scan": {
     "file": "posts/blelloch-scan.md",
-    "createdAt": "2026-06-24T09:06:31.525Z",
-    "updatedAt": "2026-06-24T09:06:31.525Z"
+    "createdAt": "2026-06-24T18:00:02+08:00",
+    "updatedAt": "2026-06-24T18:00:02+08:00"
   },
   "code-snippet-demo": {
     "file": "posts/code-snippet-demo.md",
@@ -78,5 +78,10 @@
     "file": "posts/writing-workflow.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
     "updatedAt": "2026-05-14T01:45:07+08:00"
+  },
+  "计算最接近的2次幂": {
+    "file": "posts/计算最接近的2次幂.md",
+    "createdAt": "2026-07-22T11:19:51.301Z",
+    "updatedAt": "2026-07-22T11:19:51.301Z"
   }
 }

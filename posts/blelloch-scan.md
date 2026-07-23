@@ -1,14 +1,14 @@
 ---
 title: "Blelloch scan"
 date: 2026-06-17
-summary: ""
+summary: "Belloch "
 tags: []
 tab: articles
 layout: single
-draft: true
+draft: false
 ---
 
-# Blelloch scan
+#
 ```cpp
 for (int offset = 1; offset < B; offset <<= 1) {
     parallel_for i:
@@ -129,9 +129,9 @@ x[right] = I的前缀和， 即sum[0, left)
 ```
 
 > 为什么要单独有x[n-1] = 0 ？
-> 
+>
 > x作为一整个完整的区间I，前面已经没有和了，sum[before_0, 0)  = 0
- 
+
 
 现在分析`down-sweep`操作的每一步的意义
 
@@ -204,5 +204,4 @@ x[left] = sum[l, mid)
 $$offset=k^s$$
 ，而数组长度则要满足
 $$km$$
-
 

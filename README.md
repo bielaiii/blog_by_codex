@@ -355,13 +355,48 @@ node scripts/generate-post-metadata.js
 
 因为页面通过 `fetch` 加载 Markdown 文件，不能直接双击 `index.html` 用 `file://` 方式预览。
 
-如果你继续使用 WSL2，可以在项目目录启动：
+需要使用页面内编辑、保存、删除以及草稿预览时，在项目目录启动：
 
 ```bash
-python3 -m http.server 8001
+node preview-server.js
 ```
 
-然后访问 `http://127.0.0.1:8001`。
+然后访问 `http://127.0.0.1:8000`。本地服务启动时会自动生成包含全部草稿的文章列表；编辑器的“发布状态”可以在“公开”和“草稿”之间切换。
+
+部署工作流会重新生成公开列表，`draft: true` 的文章不会发布到 GitHub Pages。
+
+## 编辑器 Snippet
+
+Snippet 保存在项目根目录的 `snippets/` 文件夹中。本地预览服务会递归读取其中所有 `.json` 文件，刷新编辑页即可加载新内容。
+
+有三种使用方式：
+
+- 在编辑区的普通正文位置输入 `/`，打开包含 Markdown 与自定义 Snippet 的智能提示；输入 `\/` 可插入普通斜杠而不唤醒。
+- 点击编辑器工具栏的 `Snippet` 按钮。
+- 按 `Ctrl + Shift + P`；macOS 使用 `Command + Shift + P`。
+- 在编辑区输入 prefix（例如 `align`）后按 `Tab` 直接展开。
+
+插入后，使用 `Tab` 和 `Shift + Tab` 在 `${1}`、`${2}` 等占位符之间移动，`${0}` 是最后的光标位置。
+
+编辑器会自动补全 `()`、`[]`、`{}`、`<>`、引号、反引号和 `$...$`，并把光标放在符号中间。选中文本后输入左侧符号会包裹选区；在空符号对中按退格会同时删除两侧。符号前有奇数个反斜杠时不会自动补全。
+
+格式示例：
+
+```json
+{
+  "Align equations": {
+    "prefix": ["align", "eqalign"],
+    "description": "插入可对齐的多行 LaTeX 公式",
+    "body": [
+      "\\begin{align}",
+      "${1:left} &= ${2:right} \\\\",
+      "${3:left} &= ${4:right}",
+      "\\end{align}",
+      "${0}"
+    ]
+  }
+}
+```
 
 ## 部署到 GitHub Pages
 

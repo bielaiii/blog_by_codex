@@ -1,0 +1,64 @@
+{
+  "Align equations": {
+    "prefix": ["align", "eqalign", "begin"],
+    "description": "插入可对齐的多行 LaTeX 公式",
+    "body": [
+      "\\begin{align}",
+      "${1:left} &= ${2:right} \\\\",
+      "${3:left} &= ${4:right}",
+      "\\end{align}",
+      "${0}"
+    ]
+  },
+  "Display math": {
+    "prefix": ["math", "displaymath"],
+    "description": "插入块级 LaTeX 公式",
+    "body": [
+      "$$",
+      "${1:formula}",
+      "$$",
+      "${0}"
+    ]
+  },
+  "Fenced code": {
+    "prefix": ["code", "fence"],
+    "description": "插入 Markdown 围栏代码块",
+    "body": [
+      "```${1:cpp}",
+      "${2:code}",
+      "```",
+      "${0}"
+    ]
+  },
+  "Mermaid diagram": {
+    "prefix": ["mermaid", "diagram"],
+    "description": "插入 Mermaid 流程图",
+    "body": [
+      "```mermaid",
+      "flowchart LR",
+      "  ${1:A} --> ${2:B}",
+      "```",
+      "${0}"
+    ]
+  },
+  "Markdown table": {
+    "prefix": ["table", "table2", "mdtable"],
+    "description": "插入两列 Markdown 表格",
+    "body": [
+      "| ${1:Column A} | ${2:Column B} |",
+      "| --- | --- |",
+      "| ${3:Value A} | ${4:Value B} |",
+      "${0}"
+    ]
+  },
+  "Markdown table · 3 columns": {
+    "prefix": ["table3", "mdtable3"],
+    "description": "插入三列 Markdown 表格",
+    "body": [
+      "| ${1:Column A} | ${2:Column B} | ${3:Column C} |",
+      "| --- | --- | --- |",
+      "| ${4:Value A} | ${5:Value B} | ${6:Value C} |",
+      "${0}"
+    ]
+  }
+}

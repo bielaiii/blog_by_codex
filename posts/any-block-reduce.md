@@ -1,14 +1,12 @@
 ---
 title: "Any-block reduce"
 date: 2026-06-24
-summary: ""
+summary: "任意block大小的reduce算法"
 tags: []
 tab: articles
 layout: single
-draft: true
+draft: false
 ---
-
-# any block reduce
 
 ```cpp
 int active = blockDim.x;
