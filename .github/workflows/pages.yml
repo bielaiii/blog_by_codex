@@ -33,13 +33,16 @@ jobs:
           node scripts/generate-post-metadata.js
           node scripts/check-site.js
 
+      - name: Build public site
+        run: node scripts/build-site.js "$RUNNER_TEMP/site"
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: ${{ runner.temp }}/site
 
       - name: Deploy
         id: deployment

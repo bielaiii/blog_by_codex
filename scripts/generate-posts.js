@@ -178,7 +178,7 @@ const posts = fs.readdirSync(postsDir)
       ...(config.visible === false ? { visible: false } : {})
     };
   })
-  .filter((post) => process.env.INCLUDE_DRAFTS === "true" || !post.draft)
+  .filter((post) => process.env.INCLUDE_DRAFTS === "true" || (!post.draft && !post.hidden && post.visible !== false))
   .sort((a, b) => b.date.localeCompare(a.date));
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
