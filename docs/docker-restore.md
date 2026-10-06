@@ -31,7 +31,7 @@ docker compose up -d --no-build --pull never --wait
 
 打开 `http://127.0.0.1:8000/`。新机器不需要安装 Node.js、npm、Python 或 SSH 服务，这些运行工具由镜像提供。构建首次下载公共 Node 基础镜像和 Debian 工具包；项目镜像只保留在本机。以后有了镜像，启动命令不会拉取或构建镜像。
 
-Dockerfile 固定 Node 版本，安装 Git、Bash、SSH、格式化与 VS Code 连接工具。依赖包的安全更新可能使日后重建的镜像内容有所变化；若需要完整保留某次镜像，使用下节的 `save/load`。
+Dockerfile 固定 Node 版本，安装 Git、Bash、SSH 与 VS Code 连接工具。和当前离线镜像一样，默认不安装可选的 `clang-format`；Markdown 格式化保留，C/C++ 代码格式化会提示缺少工具。依赖包的安全更新可能使日后重建的镜像内容有所变化；若需要完整保留某次镜像，使用下节的 `save/load`。
 
 Linux 使用非 1000 的用户 ID 时，在构建和启动前设置挂载目录的 UID/GID：
 
