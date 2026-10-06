@@ -424,7 +424,7 @@ Windows VS Code 安装微软的 **Dev Containers** 扩展后，按 `F1` 执行 *
 完整步骤见 [Git 备份与 Docker 恢复](docs/docker-restore.md)。项目已包含可在 Windows、WSL、Linux 和 macOS 构建的 `Dockerfile`；只需 Git、Docker Linux 容器引擎与 Compose，不要求宿主安装 Node.js。
 
 ```sh
-git clone git@github.com:bielaiii/blog_by_codex.git
+git clone https://github.com/bielaiii/blog_by_codex.git
 cd blog_by_codex
 docker compose build blog
 docker compose up -d --no-build --pull never --wait

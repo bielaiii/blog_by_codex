@@ -23,7 +23,7 @@ git push origin master
 Windows 先启动 Docker Desktop 的 Linux 容器引擎；macOS 启动 Docker Desktop；Linux 安装并启动 Docker Engine 和 Compose 插件。
 
 ```sh
-git clone git@github.com:bielaiii/blog_by_codex.git
+git clone https://github.com/bielaiii/blog_by_codex.git
 cd blog_by_codex
 docker compose build blog
 docker compose up -d --no-build --pull never --wait
