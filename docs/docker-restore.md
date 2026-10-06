@@ -1,6 +1,6 @@
 # Git 备份与 Docker 恢复
 
-Git 保存源码、Markdown、前端资源和环境构建方法。Docker 镜像在新机器本地构建，不需要上传 Docker Hub。Windows、WSL、Linux 和 macOS 都可以使用同一份 Compose；需要 Git、可用的 Linux 容器引擎和 Docker Compose v2 或更新版本。
+Git 保存源码、Markdown、前端资源和环境构建方法。Docker 镜像在新机器本地构建，不上传 Docker Hub，也不上传 GitHub Release。Windows、WSL、Linux 和 macOS 都可以使用同一份 Compose；需要 Git、可用的 Linux 容器引擎和 Docker Compose v2 或更新版本。
 
 ## 提交哪些文件
 
@@ -53,16 +53,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-local.p
 
 WSL/Linux 的脚本入口是 `bash scripts/build-image.sh` 与 `bash scripts/deploy-local.sh`，这些辅助脚本另外使用宿主 Python 3。仅使用上面的原生 Compose 命令不需要宿主 Python。
 
-## 完全离线恢复：另存镜像
-
-当前可用的 AMD64 运行镜像另外备份在 [GitHub Release：docker-backup-20261006](https://github.com/bielaiii/blog_by_codex/releases/tag/docker-backup-20261006)，没有上传 Docker 镜像仓库。下载 `blog-by-codex-linux-amd64.tar.gz` 和 `SHA256SUMS`，然后执行：
-
-```sh
-docker image load -i /path/to/backup/blog-by-codex-linux-amd64.tar.gz
-docker compose up -d --no-build --pull never --wait
-```
-
-Docker 可以直接加载 gzip 压缩的镜像归档，不需要先解压。这个归档保留当前运行工具的确切版本；Git 中的项目源码通过 `/app` 挂载，不在镜像里。换成 ARM64 时按上一节构建。
+## 可选：自己保存本地镜像用于完全离线恢复
 
 Git 不保存 Docker 引擎里的镜像。要保留当前环境，并在同一 CPU 架构的新机器上离线恢复，先在旧机器执行：
 

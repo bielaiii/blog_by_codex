@@ -430,7 +430,7 @@ docker compose build blog
 docker compose up -d --no-build --pull never --wait
 ```
 
-首次构建会下载公共基础镜像和工具包，项目镜像只保留在本机。之后启动只使用本地镜像。完全离线时另用 `docker image save/load` 保存和恢复镜像；Git 保存环境的构建方法，不保存镜像和 Docker 数据卷。新机器的 LAN/SSH/登录启动需按说明重新配置。
+首次构建会下载公共基础镜像和工具包，项目镜像只保留在本机，不上传 Docker Hub 或 GitHub Release。之后启动只使用本地镜像。完全离线时可自行用 `docker image save/load` 保存和恢复镜像；Git 保存环境的构建方法，不保存镜像和 Docker 数据卷。新机器的 LAN/SSH/登录启动需按说明重新配置。
 
 ## Mac 通过局域网编辑源码与文章
 
