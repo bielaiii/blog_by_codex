@@ -1,0 +1,4 @@
+# WSL shell entrypoints must retain LF when checked out with Windows Git.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yaml text eol=lf

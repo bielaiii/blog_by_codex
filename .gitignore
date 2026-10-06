@@ -1,0 +1,9 @@
+# Local access configuration; never commit keys or per-machine settings.
+.local/
+# Local image/volume backups and machine-specific environment files.
+*.tar
+*.tar.gz
+*.tgz
+.env
+.env.*
+!.env.example

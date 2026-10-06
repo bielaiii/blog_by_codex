@@ -4,6 +4,8 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const postsDir = path.join(root, "posts");
 const outputPath = path.join(root, "data", "posts.json");
+const siteConfig = JSON.parse(fs.readFileSync(path.join(root, "data", "site-config.json"), "utf8"));
+const publishDrafts = siteConfig.publishDrafts === true;
 
 const overrides = {
   "resume-profile": {
@@ -178,7 +180,7 @@ const posts = fs.readdirSync(postsDir)
       ...(config.visible === false ? { visible: false } : {})
     };
   })
-  .filter((post) => process.env.INCLUDE_DRAFTS === "true" || (!post.draft && !post.hidden && post.visible !== false))
+  .filter((post) => process.env.INCLUDE_DRAFTS === "true" || ((!post.draft || publishDrafts) && !post.hidden && post.visible !== false))
   .sort((a, b) => b.date.localeCompare(a.date));
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

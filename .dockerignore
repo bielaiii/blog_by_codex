@@ -1,0 +1,4 @@
+# This image packages tools only. Never send project files or local keys.
+**
+!Dockerfile
+!.dockerignore

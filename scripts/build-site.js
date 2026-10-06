@@ -23,9 +23,11 @@ function copy(relativePath) {
 
 const posts = JSON.parse(fs.readFileSync(path.join(root, "data/posts.json"), "utf8"));
 const metadata = JSON.parse(fs.readFileSync(path.join(root, "data/post-metadata.json"), "utf8"));
+const siteConfig = JSON.parse(fs.readFileSync(path.join(root, "data/site-config.json"), "utf8"));
+const publishDrafts = siteConfig.publishDrafts === true;
 
 for (const post of posts) {
-  if (post.draft || post.hidden || post.visible === false || !post.file?.startsWith("posts/")) {
+  if ((post.draft && !publishDrafts) || post.hidden || post.visible === false || !post.file?.startsWith("posts/")) {
     throw new Error(`Cannot publish post: ${post.slug}`);
   }
 }
@@ -34,6 +36,9 @@ for (const post of posts) {
   "index.html",
   "styles.css",
   "app.js",
+  "modules/data.js",
+  "modules/editor.js",
+  "modules/markdown.js",
   "data/posts.json",
   "data/site-config.json",
   "data/skills.json",
@@ -41,6 +46,19 @@ for (const post of posts) {
   "data/highlight-styles.json",
   "posts/tooltips.json"
 ].forEach(copy);
+
+function copyVendorFiles(directory = "vendor") {
+  for (const entry of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
+    const relativePath = path.posix.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      copyVendorFiles(relativePath);
+    } else if (entry.isFile()) {
+      copy(relativePath);
+    }
+  }
+}
+
+copyVendorFiles();
 
 for (const post of posts) {
   copy(post.file);

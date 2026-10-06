@@ -1,0 +1,39 @@
+name: blog-by-codex-local
+
+services:
+  blog:
+    image: ${BLOG_IMAGE:-blog-by-codex:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BLOG_UID: "${BLOG_UID:-1000}"
+        BLOG_GID: "${BLOG_GID:-1000}"
+    pull_policy: never
+    restart: unless-stopped
+    init: true
+    working_dir: /app
+    user: "${BLOG_UID:-1000}:${BLOG_GID:-1000}"
+    entrypoint: ["/usr/local/bin/node"]
+    command: ["preview-server.js"]
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8000"
+      BLOG_LAN_EDITOR: "${BLOG_LAN_EDITOR:-false}"
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: /app
+    ports:
+      - "${BLOG_HTTP_BIND:-127.0.0.1}:${BLOG_PORT:-8000}:8000"
+    volumes:
+      - type: bind
+        source: ${BLOG_PROJECT_DIR:-.}
+        target: /app
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/node", "-e", "require('http').get('http://127.0.0.1:8000/',r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

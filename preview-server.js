@@ -6,6 +6,8 @@ const root = __dirname;
 const postsDir = path.join(root, 'posts');
 const snippetsDir = path.join(root, 'snippets');
 const port = Number(process.env.PORT) || 8000;
+const host = process.env.HOST || '127.0.0.1';
+const lanEditor = process.env.BLOG_LAN_EDITOR === 'true';
 const mime = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -16,7 +18,10 @@ const mime = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf'
 };
 
 function sendJson(res, status, payload) {
@@ -367,6 +372,18 @@ function handleSavePost(req, res) {
 }
 
 const server = http.createServer((req, res) => {
+  const route = (req.url || '/').split('?')[0];
+  if (req.method === 'GET' && route === '/api/preview-config') {
+    sendJson(res, 200, { localEditor: lanEditor });
+    return;
+  }
+  if (req.method === 'POST' && route.startsWith('/api/')) {
+    if (req.headers['sec-fetch-site'] === 'cross-site' ||
+        (req.headers.origin && req.headers.origin !== `http://${req.headers.host}`)) {
+      sendJson(res, 403, { error: 'Cross-origin editing is not allowed' });
+      return;
+    }
+  }
   if (req.method === 'GET' && (req.url || '').split('?')[0] === '/api/snippets') {
     handleListSnippets(req, res);
     return;
@@ -387,7 +404,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const requestPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(route);
+  } catch {
+    sendJson(res, 400, { error: 'Invalid URL' });
+    return;
+  }
+  if (requestPath.split(/[\\/]/).some(segment => segment.startsWith('.'))) {
+    sendJson(res, 403, { error: 'Private project files are not served' });
+    return;
+  }
   const normalized = path.normalize(requestPath).replace(/^([.][.][\\/])+/, '');
   let filePath = path.join(root, normalized === '\\' || normalized === '/' ? 'index.html' : normalized);
   if (!filePath.startsWith(root)) {
@@ -423,7 +450,7 @@ runGenerators((generatorErr) => {
     return;
   }
 
-  server.listen(port, '127.0.0.1', () => {
-    console.log(`Preview server running at http://127.0.0.1:${port}`);
+  server.listen(port, host, () => {
+    console.log(`Preview server running at http://${host}:${port}`);
   });
 });

@@ -1,0 +1,20 @@
+# Loaded only when .local/remote.json enables SSH access.
+services:
+  blog:
+    entrypoint: ["/usr/local/bin/node", "scripts/container-entrypoint.js"]
+    command: []
+    ports:
+      - "${BLOG_SSH_BIND:-127.0.0.1}:${BLOG_SSH_PORT:-2222}:2222"
+    volumes:
+      - type: bind
+        source: ${BLOG_PROJECT_DIR:-.}/.local/authorized_keys
+        target: /run/blog-authorized_keys
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: volume
+        source: blog-remote-home
+        target: /home/blog
+
+volumes:
+  blog-remote-home:
