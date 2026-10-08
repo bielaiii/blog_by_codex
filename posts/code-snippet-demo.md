@@ -1,3 +1,13 @@
+---
+title: "Markdown 与代码高亮的展示示例"
+date: "2026-03-20"
+summary: "这篇文章用来验证标题、列表、引用、表格和代码块等常见内容的展示效果，也适合演示分享型文章的归档样式。"
+tags: ["Markdown", "代码", "示例"]
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # Markdown 与代码高亮的展示示例
 
 这是一篇专门用来做展示测试的文章，方便确认博客的排版是否稳定。

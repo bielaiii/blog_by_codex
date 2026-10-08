@@ -1,3 +1,13 @@
+---
+title: "Hillis-Steele scan"
+date: "2026-06-12"
+summary: "用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。"
+tags: ["CUDA", "并行算法", "Scan"]
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # Hillis-Steele scan
 
 ### 伪代码

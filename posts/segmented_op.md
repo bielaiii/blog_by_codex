@@ -1,3 +1,13 @@
+---
+title: "segmented operation"
+date: "2026-06-14"
+summary: "用 inclusive segmented scan 的 CUDA 示例理解 head flag 如何传播，以及为什么每个线程能在不跨段的情况下累计前缀和。"
+tags: ["CUDA", "并行算法", "Scan"]
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # segmented operation
 
 ```cpp

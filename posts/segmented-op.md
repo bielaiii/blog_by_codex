@@ -1,3 +1,13 @@
+---
+title: "segmented operation"
+date: "2026-10-06"
+summary: "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5"
+tags: []
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # segmented operation
 
 ```cpp

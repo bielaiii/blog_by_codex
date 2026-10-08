@@ -1,57 +1,53 @@
 [
   {
-    "slug": "layout-features-demo",
-    "tab": "articles",
     "title": "博客文章效果与语法演示",
     "date": "2026-10-06",
     "summary": "这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 <! row 是一组左右对照，组内用 <! column 分隔左侧和右侧。 <! row 左侧可以放概念、图示、过程说明，右侧放对应代码或解...",
     "tags": [],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/layout-features-demo.md"
+    "draft": false,
+    "slug": "layout-features-demo",
+    "file": "posts/layout-features-demo.md",
+    "version": "2038fb9dfc66fc0682e0c2b6dd6fd25df42c00df43583b9bff733a1c19abc899"
   },
   {
-    "slug": "segmented-op",
-    "tab": "articles",
     "title": "segmented operation",
     "date": "2026-10-06",
     "summary": "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5",
     "tags": [],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/segmented-op.md"
+    "draft": false,
+    "slug": "segmented-op",
+    "file": "posts/segmented-op.md",
+    "version": "c912728b81c1d6b9966843f2162ebcb857512ae05d0aa99c40d3f0a10d14458a"
   },
   {
-    "slug": "计算最接近的2次幂",
-    "tab": "articles",
-    "title": "计算最接近的2次幂",
-    "date": "2026-07-22",
-    "summary": "关于如何找到数字n最接近的2次幂",
-    "tags": [],
-    "layout": "single",
-    "file": "posts/计算最接近的2次幂.md",
-    "draft": true
-  },
-  {
-    "slug": "any-block-reduce",
-    "tab": "articles",
     "title": "Any-block reduce",
     "date": "2026-06-24",
     "summary": "任意block大小的reduce算法",
     "tags": [],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/any-block-reduce.md"
+    "draft": false,
+    "slug": "any-block-reduce",
+    "file": "posts/any-block-reduce.md",
+    "version": "e2bec34c46b3587a479cd7aded161973e5c1b4ba6859f96c2c30b5ada4e89dcb"
   },
   {
-    "slug": "blelloch-scan",
-    "tab": "articles",
     "title": "Blelloch scan",
     "date": "2026-06-17",
     "summary": "Belloch ",
     "tags": [],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/blelloch-scan.md"
+    "draft": false,
+    "slug": "blelloch-scan",
+    "file": "posts/blelloch-scan.md",
+    "version": "d22e752d919f1b4df51c935d093792ad8fe21893c699d9639475bedcde3e7a31"
   },
   {
-    "slug": "async_io_frame",
     "tab": "projects",
     "title": "async_io_framework",
     "date": "2026-06-15",
@@ -62,8 +58,6 @@
       "epoll",
       "Async IO"
     ],
-    "layout": "single",
-    "file": "posts/async_io_frame.md",
     "stage": "架构主线已成型：Coroutine -> Operation -> Scheduler -> epoll/timerfd/eventfd",
     "stack": [
       "C++20",
@@ -77,10 +71,164 @@
       "timeout/cancel",
       "event arbitration"
     ],
-    "repo": "https://github.com/bielaiii/async_io_framework"
+    "repo": "https://github.com/bielaiii/async_io_framework",
+    "visual": "posts/projects/async_io_frame.json",
+    "slug": "async_io_frame",
+    "file": "posts/async_io_frame.md",
+    "layout": "single",
+    "version": "fb40694877c2ddff4ee544bb502b7942e8141462553534cee297b245feed9f5d",
+    "visualData": {
+      "eyebrow": "C++ coroutine async I/O runtime",
+      "repoLabel": "GitHub",
+      "sections": {
+        "architecture": "Coroutine、operation 与内核事件的分层",
+        "capabilities": "框架当前承接的异步能力",
+        "flow": "一次 async operation 的生命周期",
+        "boundaries": "运行时设计边界"
+      },
+      "architecture": [
+        {
+          "title": "Coroutine API",
+          "nodes": [
+            {
+              "title": "User Coroutine",
+              "detail": "以 co_await 组织异步读写流程"
+            },
+            {
+              "title": "async_* Awaiter",
+              "detail": "connect / accept / read / write / timer"
+            }
+          ]
+        },
+        {
+          "title": "Runtime Core",
+          "nodes": [
+            {
+              "title": "Operation State",
+              "detail": "仲裁 ready、timeout、cancel 的完成权"
+            },
+            {
+              "title": "Scheduler",
+              "detail": "维护 fd 到 pending operation 的映射"
+            },
+            {
+              "title": "Buffer View",
+              "detail": "管理读写偏移和剩余容量"
+            }
+          ]
+        },
+        {
+          "title": "Kernel Events",
+          "nodes": [
+            {
+              "title": "epoll",
+              "detail": "分发 socket readiness"
+            },
+            {
+              "title": "timerfd",
+              "detail": "驱动 wait_for 和 timeout"
+            },
+            {
+              "title": "eventfd",
+              "detail": "主动唤醒取消路径"
+            }
+          ]
+        }
+      ],
+      "capabilities": [
+        {
+          "title": "Socket I/O",
+          "items": [
+            "async_connect",
+            "async_accept",
+            "async_read",
+            "async_write",
+            "async_read_some"
+          ]
+        },
+        {
+          "title": "Timer",
+          "items": [
+            "wait_for",
+            "read timeout",
+            "write timeout",
+            "timer queue"
+          ]
+        },
+        {
+          "title": "Cancellation",
+          "items": [
+            "cancel_token",
+            "eventfd wakeup",
+            "operation_state arbitration"
+          ]
+        },
+        {
+          "title": "Scheduling",
+          "items": [
+            "fd readiness",
+            "read slot",
+            "write slot",
+            "epoll dispatch"
+          ]
+        },
+        {
+          "title": "Buffer",
+          "items": [
+            "StaticBuffer",
+            "DynamicBuffer",
+            "Buffer_View",
+            "offset tracking"
+          ]
+        }
+      ],
+      "flow": [
+        {
+          "title": "Await",
+          "detail": "coroutine 提交 async operation"
+        },
+        {
+          "title": "Register",
+          "detail": "Scheduler 注册 fd / timer / cancel interest"
+        },
+        {
+          "title": "Suspend",
+          "detail": "operation 挂起 coroutine"
+        },
+        {
+          "title": "Wake",
+          "detail": "epoll_wait 返回 socket、timer 或 cancel 事件"
+        },
+        {
+          "title": "Arbitrate",
+          "detail": "operation_state 决定完成结果"
+        },
+        {
+          "title": "Resume",
+          "detail": "coroutine 恢复并清理注册项"
+        }
+      ],
+      "boundaries": [
+        {
+          "title": "Thin Runtime",
+          "detail": "只包装 readiness，不隐藏底层事件模型"
+        },
+        {
+          "title": "Single Waiter",
+          "detail": "同一 socket fd 保持单读槽、单写槽"
+        },
+        {
+          "title": "Active Cancel",
+          "detail": "取消会唤醒 epoll，而不是等待下一次 socket ready"
+        },
+        {
+          "title": "Timer Dispatch",
+          "detail": "timerfd 当前按调度器事件推进，不是批量 dispatcher 模型"
+        }
+      ]
+    }
   },
   {
-    "slug": "gdb_cli_tools",
     "tab": "projects",
     "title": "gdb-agent",
     "date": "2026-06-15",
@@ -91,8 +239,6 @@
       "Debugging",
       "Vibe Coding"
     ],
-    "layout": "single",
-    "file": "posts/gdb_cli_tools.md",
     "stage": "架构主线已成型：Vibe Coding Loop -> Session -> Action -> Evidence -> Report",
     "stack": [
       "C++20",
@@ -106,11 +252,170 @@
       "evidence flow",
       "session runtime"
     ],
-    "repo": "https://github.com/bielaiii/gdb_cli_tools"
+    "repo": "https://github.com/bielaiii/gdb_cli_tools",
+    "visual": "posts/projects/gdb_cli_tools.json",
+    "slug": "gdb_cli_tools",
+    "file": "posts/gdb_cli_tools.md",
+    "layout": "single",
+    "version": "74e3fa7bb161e751bb4906379158a78b0b89ca8f3eff3e63801556b365ffc6ce",
+    "visualData": {
+      "eyebrow": "Vibe-coded GDB/MI evidence runtime",
+      "repoLabel": "GitHub",
+      "sections": {
+        "architecture": "vibe-coding loop、session、action 与 evidence 的分层",
+        "capabilities": "调试会话暴露给 Agent 的操作面",
+        "flow": "一次调试动作的执行链路",
+        "boundaries": "GDB 执行层与 Agent 推理层的职责边界"
+      },
+      "architecture": [
+        {
+          "title": "Agent Layer",
+          "nodes": [
+            {
+              "title": "Vibe Coding Loop",
+              "detail": "用 Agent 快速提出假设、补动作、看证据"
+            },
+            {
+              "title": "Hypothesis",
+              "detail": "把直觉式探索沉淀成可追踪的问题链"
+            }
+          ]
+        },
+        {
+          "title": "Runtime Layer",
+          "nodes": [
+            {
+              "title": "Task File",
+              "detail": "描述 target、参数、工作目录、core"
+            },
+            {
+              "title": "Session",
+              "detail": "维护 live debugging 上下文"
+            },
+            {
+              "title": "Action Dispatcher",
+              "detail": "执行高层调试动作"
+            }
+          ]
+        },
+        {
+          "title": "Execution Layer",
+          "nodes": [
+            {
+              "title": "GDB/MI",
+              "detail": "稳定执行 debugger 指令"
+            },
+            {
+              "title": "Evidence Store",
+              "detail": "保存 raw、summary、index、hash"
+            },
+            {
+              "title": "Report Assets",
+              "detail": "输出可审计报告素材"
+            }
+          ]
+        }
+      ],
+      "capabilities": [
+        {
+          "title": "Session runtime",
+          "items": [
+            "daemon",
+            "create",
+            "action",
+            "status",
+            "finish",
+            "close"
+          ]
+        },
+        {
+          "title": "Debug actions",
+          "items": [
+            "backtrace",
+            "locals",
+            "registers",
+            "threads",
+            "evaluate",
+            "frame_select"
+          ]
+        },
+        {
+          "title": "Probe control",
+          "items": [
+            "breakpoint",
+            "watchpoint",
+            "catchpoint",
+            "probe enable",
+            "probe delete"
+          ]
+        },
+        {
+          "title": "Evidence flow",
+          "items": [
+            "raw MI",
+            "summary",
+            "index",
+            "raw hash",
+            "snapshot"
+          ]
+        },
+        {
+          "title": "Agent workflow",
+          "items": [
+            "hypothesis",
+            "replay",
+            "report",
+            "raw_mi escape hatch"
+          ]
+        }
+      ],
+      "flow": [
+        {
+          "title": "Describe",
+          "detail": "Task file 定义被调试目标"
+        },
+        {
+          "title": "Create",
+          "detail": "建立 live session"
+        },
+        {
+          "title": "Act",
+          "detail": "Agent 选择高层 action"
+        },
+        {
+          "title": "Observe",
+          "detail": "GDB/MI 返回 raw evidence"
+        },
+        {
+          "title": "Record",
+          "detail": "写入 evidence store"
+        },
+        {
+          "title": "Report",
+          "detail": "引用证据生成报告"
+        }
+      ],
+      "boundaries": [
+        {
+          "title": "No PTY",
+          "detail": "通过 GDB/MI 执行，不提供交互式终端会话"
+        },
+        {
+          "title": "No interactive stdin",
+          "detail": "inferior stdin 默认不是交互入口"
+        },
+        {
+          "title": "Replay scope",
+          "detail": "重放高层 action，不恢复旧 GDB 进程"
+        },
+        {
+          "title": "Raw MI",
+          "detail": "作为显式 escape hatch，而不是默认入口"
+        }
+      ]
+    }
   },
   {
-    "slug": "layout_features_demo",
-    "tab": "articles",
     "title": "博客文章效果与语法演示",
     "date": "2026-06-14",
     "summary": "集中展示两列对照布局、代码块折叠、行内高亮、术语提示和表格等文章写法。",
@@ -119,12 +424,14 @@
       "语法",
       "示例"
     ],
+    "tab": "articles",
     "layout": "two-column",
-    "file": "posts/layout_features_demo.md"
+    "draft": false,
+    "slug": "layout_features_demo",
+    "file": "posts/layout_features_demo.md",
+    "version": "b394de5c06f87c6daf39a72416b45044270d05bed94ee8e20fb8c5c164994c05"
   },
   {
-    "slug": "parallel_primitives",
-    "tab": "articles",
     "title": "cuda常用parallel primitives操作",
     "date": "2026-06-14",
     "summary": "整理 CUDA 中常见的 parallel primitives：reduce、scan、stencil、gather、scatter、sort、map、partition、compact 等操作。",
@@ -132,12 +439,14 @@
       "CUDA",
       "并行算法"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/parallel_primitives.md"
+    "draft": false,
+    "slug": "parallel_primitives",
+    "file": "posts/parallel_primitives.md",
+    "version": "6805292c05594cff76c6cbcf6d422c1c1ca99f7206bdafcf808b76b701a6c1eb"
   },
   {
-    "slug": "segmented_op",
-    "tab": "articles",
     "title": "segmented operation",
     "date": "2026-06-14",
     "summary": "用 inclusive segmented scan 的 CUDA 示例理解 head flag 如何传播，以及为什么每个线程能在不跨段的情况下累计前缀和。",
@@ -146,12 +455,14 @@
       "并行算法",
       "Scan"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/segmented_op.md"
+    "draft": false,
+    "slug": "segmented_op",
+    "file": "posts/segmented_op.md",
+    "version": "1c784a2db6ab9f88e37c14ae04132d9c954a51b6699071e4c03edd8f98ef5166"
   },
   {
-    "slug": "Hillis-Steele_scan",
-    "tab": "articles",
     "title": "Hillis-Steele scan",
     "date": "2026-06-12",
     "summary": "用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。",
@@ -160,12 +471,14 @@
       "并行算法",
       "Scan"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/Hillis-Steele_scan.md"
+    "draft": false,
+    "slug": "Hillis-Steele_scan",
+    "file": "posts/Hillis-Steele_scan.md",
+    "version": "10e4a8cd09dfbc28eb142511989a752017c0814ef803b2b692ff70d2abca12cd"
   },
   {
-    "slug": "why_tree_reduction_and_scan_work",
-    "tab": "articles",
     "title": "为什么 reduce 和 scan 能刚好处理数组",
     "date": "2026-06-12",
     "summary": "从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。",
@@ -174,22 +487,26 @@
       "Reduction",
       "Scan"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/why_tree_reduction_and_scan_work.md"
+    "draft": false,
+    "slug": "why_tree_reduction_and_scan_work",
+    "file": "posts/why_tree_reduction_and_scan_work.md",
+    "version": "bb9d380b9f7883de8ba5feb3cb446a81c4a24bff93bfec25356dedc9d691f6cf"
   },
   {
-    "slug": "resume-profile",
-    "tab": "resume",
     "title": "个人简历",
     "date": "2026-03-29",
     "summary": "",
     "tags": [],
+    "tab": "resume",
     "layout": "single",
-    "file": "posts/resume-profile.md"
+    "draft": false,
+    "slug": "resume-profile",
+    "file": "posts/resume-profile.md",
+    "version": "6670366241e3853113a0736429078d989ab4569e9616834b400c57f0c17d507e"
   },
   {
-    "slug": "first-post",
-    "tab": "articles",
     "title": "把个人博客搭成一个长期写作入口",
     "date": "2026-03-28",
     "summary": "从结构、样式和部署方式出发，建立一个能长期维护的静态博客。文章归档页先显示标题和预览，点进去再阅读完整内容。",
@@ -198,12 +515,14 @@
       "GitHub Pages",
       "Markdown"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/first-post.md"
+    "draft": false,
+    "slug": "first-post",
+    "file": "posts/first-post.md",
+    "version": "d3bbb6027baaf2c9891965ab701f517cd8fd8091f2bd116473e8c0beeea25626"
   },
   {
-    "slug": "project-blueprint",
-    "tab": "projects",
     "title": "个人项目页应该像一个实时项目档案",
     "date": "2026-03-24",
     "summary": "项目不仅展示结果，也展示阶段、状态和下一步。归档页先看简介，点开后再看完整项目笔记，更符合 dashboard 的浏览节奏。",
@@ -212,12 +531,14 @@
       "Dashboard",
       "设计"
     ],
+    "tab": "projects",
     "layout": "single",
-    "file": "posts/project-blueprint.md"
+    "draft": false,
+    "slug": "project-blueprint",
+    "file": "posts/project-blueprint.md",
+    "version": "62d001e160d289cccb96e3cd36b5daf5a5301c0d083f87f52fdee23ea81e5048"
   },
   {
-    "slug": "code-snippet-demo",
-    "tab": "articles",
     "title": "Markdown 与代码高亮的展示示例",
     "date": "2026-03-20",
     "summary": "这篇文章用来验证标题、列表、引用、表格和代码块等常见内容的展示效果，也适合演示分享型文章的归档样式。",
@@ -226,12 +547,14 @@
       "代码",
       "示例"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/code-snippet-demo.md"
+    "draft": false,
+    "slug": "code-snippet-demo",
+    "file": "posts/code-snippet-demo.md",
+    "version": "07f217d6ba488ed0ba551b27fc99d0979c5fc264bc4bd0fa628f8861d8db5a66"
   },
   {
-    "slug": "writing-workflow",
-    "tab": "articles",
     "title": "给持续写作保留一点轻量流程",
     "date": "2026-03-12",
     "summary": "文章越容易落地，博客越容易持续更新。流程轻一点，内容反而更稳定，也更适合放进个人文章归档。",
@@ -239,7 +562,11 @@
       "写作",
       "流程"
     ],
+    "tab": "articles",
     "layout": "single",
-    "file": "posts/writing-workflow.md"
+    "draft": false,
+    "slug": "writing-workflow",
+    "file": "posts/writing-workflow.md",
+    "version": "7cdcd53e37875d9b309e47deb4c2fa57cbb346508774bfbcbc9edc346c03090d"
   }
 ]

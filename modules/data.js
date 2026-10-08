@@ -1,64 +1,43 @@
 const paths = {
-  tooltipGlossary: "posts/tooltips.json",
-  skills: "data/skills.json",
-  siteConfig: "data/site-config.json",
-  posts: "data/posts.json",
-  postMetadata: "data/post-metadata.json",
-  tagStyles: "data/tag-styles.json",
-  highlightStyles: "data/highlight-styles.json"
+  tooltipGlossary: 'posts/tooltips.json', skills: 'data/skills.json', siteConfig: 'data/site-config.json',
+  catalog: 'data/catalog.json', tagStyles: 'data/tag-styles.json', highlightStyles: 'data/highlight-styles.json'
 };
 
-export function createDataStore(getFallbackPosts, getFallbackSiteConfig) {
+export function createDataStore(getFallbackSiteConfig) {
   const cache = new Map();
   const fallbacks = {
-    tooltipGlossary: () => ({}),
-    skills: () => ({ weightRange: { min: 1, max: 10 }, skills: [] }),
-    siteConfig: getFallbackSiteConfig,
-    posts: getFallbackPosts,
-    postMetadata: () => ({}),
-    tagStyles: () => ({}),
-    highlightStyles: () => ({})
+    tooltipGlossary: () => ({}), skills: () => ({ weightRange: { min: 1, max: 10 }, skills: [] }),
+    siteConfig: getFallbackSiteConfig, tagStyles: () => ({}), highlightStyles: () => ({})
   };
-
   function load(key) {
     if (!cache.has(key)) {
-      cache.set(key, (async () => {
+      const task = (async () => {
         try {
           const response = await fetch(paths[key]);
-          return response.ok ? await response.json() : fallbacks[key]();
+          if (!response.ok) throw new Error(`无法加载 ${paths[key]}`);
+          const value = await response.json();
+          if (key === 'catalog' && (!Array.isArray(value.posts) || !value.postMetadata || !value.searchText)) throw new Error('文章索引格式错误');
+          return value;
         } catch (error) {
-          return fallbacks[key]();
+          cache.delete(key);
+          if (fallbacks[key]) return fallbacks[key]();
+          throw error;
         }
-      })());
+      })();
+      cache.set(key, task);
     }
     return cache.get(key);
   }
-
-  async function reloadPosts() {
-    cache.delete("posts");
-    cache.delete("postMetadata");
-    const cacheBuster = Date.now();
-    const [postsResponse, metadataResponse] = await Promise.all([
-      fetch(`${paths.posts}?v=${cacheBuster}`, { cache: "no-store" }),
-      fetch(`${paths.postMetadata}?v=${cacheBuster}`, { cache: "no-store" })
-    ]);
-    if (!postsResponse.ok || !metadataResponse.ok) {
-      throw new Error("文章已写入，但列表数据刷新失败");
-    }
-    return {
-      posts: await postsResponse.json(),
-      postMetadata: await metadataResponse.json()
-    };
+  function setCatalog(catalog) { cache.set('catalog', Promise.resolve(catalog)); return catalog; }
+  async function reloadPosts(catalog) {
+    if (catalog) return setCatalog(catalog);
+    const response = await fetch(`${paths.catalog}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error('文章列表刷新失败');
+    return setCatalog(await response.json());
   }
-
   return {
-    getTooltipGlossary: () => load("tooltipGlossary"),
-    getSkillsConfig: () => load("skills"),
-    getSiteConfig: () => load("siteConfig"),
-    getPostsConfig: () => load("posts"),
-    getPostMetadata: () => load("postMetadata"),
-    getTagStyles: () => load("tagStyles"),
-    getHighlightStyles: () => load("highlightStyles"),
-    reloadPosts
+    getTooltipGlossary: () => load('tooltipGlossary'), getSkillsConfig: () => load('skills'),
+    getSiteConfig: () => load('siteConfig'), getCatalog: () => load('catalog'),
+    getTagStyles: () => load('tagStyles'), getHighlightStyles: () => load('highlightStyles'), reloadPosts
   };
 }

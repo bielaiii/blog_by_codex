@@ -1,18 +1,16 @@
-import { escapeHtml, stripFrontmatter, renderLatex, parseMarkdownWithMath } from "./markdown.js";
+import { escapeHtml, stripFrontmatter } from "./markdown.js";
+import { parseFrontmatter, createPostTemplate, setPostMetadata, toSlug } from "../shared/post-model.mjs";
+import { createRenderScope } from "./lifecycle.js";
 
 export function createEditor({
   tabs,
-  isLocalPreview,
+  canEdit,
   elements,
   getPosts,
   reloadEditorPostData,
-  getTooltipGlossary,
+  renderer,
   setHash,
-  collapseTopbar,
-  applyInlineHighlights,
-  applyInlineTooltips,
-  decorateCodeBlocks,
-  renderMermaidBlocks
+  collapseTopbar
 }) {
   const {
     welcomeViewEl,
@@ -27,69 +25,41 @@ export function createEditor({
   } = elements;
   let editorSaveInProgress = false;
   let activeEditorSnippetSession = null;
+  const previewScope = createRenderScope();
+  let editorSignal;
+  let cleanups = [];
+  function dispose() {
+    previewScope.cancel();
+    cleanups.forEach(cleanup => cleanup());
+    cleanups = [];
+    activeEditorSnippetSession = null;
+  }
+  function canLeave() {
+    const input = document.querySelector("#markdown-editor-input");
+    if (!document.body.classList.contains("is-editor-mode") || !input || input.value === input.dataset.savedValue) return true;
+    if (editorSaveInProgress || !window.confirm("有未保存的改动，是否放弃并离开？")) return false;
+    input.dataset.savedValue = input.value;
+    return true;
+  }
 
   function getEditorTemplate() {
-    const date = new Date().toISOString().slice(0, 10);
     const tab = sessionStorage.getItem("editorDefaultTab") || "articles";
     sessionStorage.removeItem("editorDefaultTab");
-    const title = tab === "projects" ? "新项目" : "新文章";
-    return `---
-  title: "${title}"
-  date: ${date}
-  summary: ""
-  tags: []
-  tab: ${tab}
-  layout: single
-  draft: true
-  ---
-
-  # ${title}
-
-  `;
+    return createPostTemplate(tab);
   }
-
   function getTitleFromMarkdown(markdown) {
-    const body = stripFrontmatter(markdown);
-    return body.match(/^#\s+(.+)$/m)?.[1]?.trim() || "new-post";
+    const { metadata, body } = parseFrontmatter(markdown);
+    return metadata.title || body.match(/^#\s+(.+)$/m)?.[1]?.trim() || "new-post";
   }
-
   function getSlugFromEditor(markdown, fallback = "") {
-    const frontmatterSlug = String(markdown || "").match(/^---\r?\n[\s\S]*?\nslug:\s*["']?([^"'\n]+)["']?/m)?.[1]?.trim();
-    if (frontmatterSlug) {
-      return frontmatterSlug;
-    }
-    return fallback || getTitleFromMarkdown(markdown)
-      .trim()
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "new-post";
+    return fallback || parseFrontmatter(markdown).metadata.slug || toSlug(getTitleFromMarkdown(markdown));
   }
-
   function getTabFromEditor(markdown) {
-    return String(markdown || "").match(/^---\r?\n[\s\S]*?\ntab:\s*["']?([^"'\n]+)["']?/m)?.[1]?.trim() || "articles";
+    try { return parseFrontmatter(markdown).metadata.tab || "articles"; }
+    catch { return "articles"; } // Navigation remains available while metadata is incomplete.
   }
-
-  function getDraftFromEditor(markdown) {
-    const frontmatter = String(markdown || "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    return frontmatter?.[1].match(/^draft:\s*(true|false)\s*$/m)?.[1] === "true";
-  }
-
-  function setEditorDraft(markdown, isDraft) {
-    const source = String(markdown || "");
-    const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    const value = `draft: ${isDraft ? "true" : "false"}`;
-
-    if (!frontmatter) {
-      return `---\n${value}\n---\n\n${source}`;
-    }
-
-    const nextFrontmatter = /^draft:\s*(?:true|false)\s*$/m.test(frontmatter[1])
-      ? frontmatter[1].replace(/^draft:\s*(?:true|false)\s*$/m, value)
-      : `${frontmatter[1]}\n${value}`;
-    return source.replace(frontmatter[0], `---\n${nextFrontmatter}\n---`);
-  }
+  function getDraftFromEditor(markdown) { return parseFrontmatter(markdown).metadata.draft === true; }
+  function setEditorDraft(markdown, isDraft) { return setPostMetadata(markdown, { draft: isDraft }); }
 
   function isEditorCharacterEscaped(source, index) {
     let slashCount = 0;
@@ -753,22 +723,29 @@ export function createEditor({
         }
       });
       resizeObserver.observe(grid);
+      cleanups.push(() => resizeObserver.disconnect());
     }
   }
 
-  async function renderEditorPreview(markdown) {
+  async function renderEditorPreview(markdown, expectedSignal = previewScope.next()) {
     const preview = document.querySelector("#markdown-editor-preview");
-    if (!preview) {
-      return;
+    const textarea = document.querySelector("#markdown-editor-input");
+    if (!preview || editorSignal?.aborted || expectedSignal.aborted) return;
+    const post = getPosts().find(item => item.slug === textarea?.dataset.slug);
+    try {
+      await renderer.render(preview, markdown, post || { file: "posts/new-post.md" }, { signal: expectedSignal });
+      if (expectedSignal.aborted || !textarea?.isConnected) return;
+      const draft = getDraftFromEditor(markdown);
+      document.querySelectorAll("[data-draft-value]").forEach(button => {
+        const active = (button.dataset.draftValue === "true") === draft;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    } catch (error) {
+      if (expectedSignal.aborted || !preview.isConnected) return;
+      preview.textContent = `预览失败：${error.message}`;
+      document.querySelector("#markdown-editor-status").textContent = error.message;
     }
-
-    preview.innerHTML = parseMarkdownWithMath(stripFrontmatter(markdown));
-    applyInlineHighlights(preview);
-    applyInlineTooltips(preview, await getTooltipGlossary());
-    renderLatex(preview);
-    preview.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
-    decorateCodeBlocks(preview);
-    await renderMermaidBlocks(preview);
   }
 
   async function readEditorApiResponse(response, fallbackMessage) {
@@ -787,28 +764,32 @@ export function createEditor({
   async function saveEditorPost({ navigate = false } = {}) {
     const textarea = document.querySelector("#markdown-editor-input");
     const statusEl = document.querySelector("#markdown-editor-status");
-    if (!textarea || !isLocalPreview || editorSaveInProgress) {
+    if (!textarea || !canEdit() || editorSaveInProgress) {
       return null;
     }
 
     editorSaveInProgress = true;
     const markdown = textarea.value;
-    const slug = getSlugFromEditor(markdown, textarea.dataset.slug || "");
     const mode = textarea.dataset.mode || "create";
     statusEl.textContent = "保存中...";
 
     try {
+      parseFrontmatter(markdown);
+      const slug = getSlugFromEditor(markdown, textarea.dataset.slug || "");
       const response = await fetch("/api/save-post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, markdown, mode })
+        body: JSON.stringify({ slug, markdown, mode, version: textarea.dataset.version })
       });
       const result = await readEditorApiResponse(response, "保存失败");
 
       statusEl.textContent = `已保存到 ${result.file}`;
-      await reloadEditorPostData();
+      await reloadEditorPostData(result.catalog);
       const tab = tabs[getTabFromEditor(markdown)] ? getTabFromEditor(markdown) : "articles";
-      textarea.dataset.savedValue = markdown;
+      if (!textarea.isConnected || editorSignal?.aborted) return result;
+      if (textarea.value === markdown && result.markdown) textarea.value = result.markdown;
+      textarea.dataset.savedValue = result.markdown || markdown;
+      textarea.dataset.version = result.version;
       textarea.dataset.slug = result.slug;
       textarea.dataset.mode = "update";
       const deleteButton = document.querySelector("#markdown-editor-delete");
@@ -835,7 +816,8 @@ export function createEditor({
     }
 
     const slug = textarea.dataset.slug;
-    const title = getTitleFromMarkdown(textarea.value);
+    let title = slug;
+    try { title = getTitleFromMarkdown(textarea.value); } catch { /* An incomplete edit can still be deleted. */ }
     if (!window.confirm(`确定删除“${title}”吗？此操作无法撤销。`)) {
       return;
     }
@@ -846,10 +828,11 @@ export function createEditor({
       const response = await fetch("/api/delete-post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug })
+        body: JSON.stringify({ slug, version: textarea.dataset.version })
       });
-      await readEditorApiResponse(response, "删除失败");
-      await reloadEditorPostData();
+      const result = await readEditorApiResponse(response, "删除失败");
+      await reloadEditorPostData(result.catalog);
+      if (!textarea.isConnected || editorSignal?.aborted) return;
       textarea.dataset.savedValue = textarea.value;
       const returnTab = tabs[getTabFromEditor(textarea.value)] ? getTabFromEditor(textarea.value) : "articles";
       setHash(returnTab);
@@ -864,7 +847,7 @@ export function createEditor({
     const textarea = document.querySelector("#markdown-editor-input");
     const statusEl = document.querySelector("#markdown-editor-status");
     const preview = document.querySelector("#markdown-editor-preview");
-    if (!textarea || !statusEl || !isLocalPreview) {
+    if (!textarea || !statusEl || !canEdit()) {
       return;
     }
 
@@ -880,6 +863,7 @@ export function createEditor({
       });
       const result = await readEditorApiResponse(response, "格式化失败");
 
+      if (!textarea.isConnected || editorSignal?.aborted || textarea.value !== previousValue) return;
       textarea.value = result.markdown;
       textarea.scrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight) * ratio;
       await renderEditorPreview(textarea.value);
@@ -888,7 +872,6 @@ export function createEditor({
       }
       statusEl.textContent = result.warnings?.length ? `已格式化，${result.warnings.length} 个代码块跳过` : "已格式化，尚未保存";
     } catch (error) {
-      textarea.value = previousValue;
       statusEl.textContent = error.message || "格式化失败";
     }
   }
@@ -937,8 +920,9 @@ export function createEditor({
     setHash(tab, textarea.dataset.slug);
   }
 
-  async function showMarkdownEditor(slug = "") {
-    if (!isLocalPreview) {
+  async function showMarkdownEditor(slug = "", { signal } = {}) {
+    editorSignal = signal;
+    if (!canEdit()) {
       setHash("welcome");
       return;
     }
@@ -958,13 +942,15 @@ export function createEditor({
     if (articleLoadingEl) { articleLoadingEl.hidden = true; }
 
     const post = slug ? getPosts().find((item) => item.slug === slug) : null;
-    let markdown = getEditorTemplate();
+    if (slug && !post) throw new Error("文章不存在，请返回归档列表");
+    let markdown, version = "";
     if (post) {
-      const response = await fetch(post.file);
-      if (response.ok) {
-        markdown = await response.text();
-      }
-    }
+      const response = await fetch(`/api/post?slug=${encodeURIComponent(slug)}`, { signal });
+      const result = await readEditorApiResponse(response, "加载文章失败");
+      markdown = result.markdown;
+      version = result.version;
+    } else markdown = getEditorTemplate();
+    if (signal?.aborted) return;
     backButtonEl.dataset.editorReturnTab = post?.tab || getTabFromEditor(markdown);
     const isDraft = getDraftFromEditor(markdown);
 
@@ -1025,6 +1011,7 @@ export function createEditor({
     const textarea = document.querySelector("#markdown-editor-input");
     textarea.value = markdown;
     textarea.dataset.slug = slug;
+    textarea.dataset.version = version;
     textarea.dataset.mode = post ? "update" : "create";
     textarea.dataset.savedValue = markdown;
     const preview = document.querySelector("#markdown-editor-preview");
@@ -1036,17 +1023,21 @@ export function createEditor({
     setupEditorSnippets(textarea);
 
     let previewFrame = 0;
+    cleanups.push(() => cancelAnimationFrame(previewFrame));
     textarea.addEventListener("input", () => {
       cancelAnimationFrame(previewFrame);
+      const previewSignal = previewScope.next();
       previewFrame = requestAnimationFrame(async () => {
         const ratio = textarea.scrollTop / Math.max(1, textarea.scrollHeight - textarea.clientHeight);
-        await renderEditorPreview(textarea.value);
+        await renderEditorPreview(textarea.value, previewSignal);
+        if (previewSignal.aborted || !preview.isConnected) return;
         preview.scrollTop = Math.max(0, preview.scrollHeight - preview.clientHeight) * ratio;
       });
     });
     document.querySelector("#markdown-editor-format").addEventListener("click", formatEditorPost);
     document.querySelectorAll("[data-draft-value]").forEach((button) => {
       button.addEventListener("click", async () => {
+        try {
         const nextIsDraft = button.dataset.draftValue === "true";
         if (nextIsDraft === getDraftFromEditor(textarea.value)) {
           return;
@@ -1059,6 +1050,9 @@ export function createEditor({
         });
         document.querySelector("#markdown-editor-status").textContent = nextIsDraft ? "已设为草稿，尚未保存" : "已设为公开，尚未保存";
         await renderEditorPreview(textarea.value);
+        } catch (error) {
+          document.querySelector("#markdown-editor-status").textContent = error.message;
+        }
       });
     });
     document.querySelector("#markdown-editor-preview-toggle").addEventListener("click", (event) => {
@@ -1074,5 +1068,5 @@ export function createEditor({
     await renderEditorPreview(markdown);
   }
 
-  return { showMarkdownEditor, exitMarkdownEditor, saveEditorPost };
+  return { showMarkdownEditor, exitMarkdownEditor, saveEditorPost, dispose, canLeave };
 }

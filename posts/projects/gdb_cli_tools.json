@@ -1,0 +1,156 @@
+{
+  "eyebrow": "Vibe-coded GDB/MI evidence runtime",
+  "repoLabel": "GitHub",
+  "sections": {
+    "architecture": "vibe-coding loop、session、action 与 evidence 的分层",
+    "capabilities": "调试会话暴露给 Agent 的操作面",
+    "flow": "一次调试动作的执行链路",
+    "boundaries": "GDB 执行层与 Agent 推理层的职责边界"
+  },
+  "architecture": [
+    {
+      "title": "Agent Layer",
+      "nodes": [
+        {
+          "title": "Vibe Coding Loop",
+          "detail": "用 Agent 快速提出假设、补动作、看证据"
+        },
+        {
+          "title": "Hypothesis",
+          "detail": "把直觉式探索沉淀成可追踪的问题链"
+        }
+      ]
+    },
+    {
+      "title": "Runtime Layer",
+      "nodes": [
+        {
+          "title": "Task File",
+          "detail": "描述 target、参数、工作目录、core"
+        },
+        {
+          "title": "Session",
+          "detail": "维护 live debugging 上下文"
+        },
+        {
+          "title": "Action Dispatcher",
+          "detail": "执行高层调试动作"
+        }
+      ]
+    },
+    {
+      "title": "Execution Layer",
+      "nodes": [
+        {
+          "title": "GDB/MI",
+          "detail": "稳定执行 debugger 指令"
+        },
+        {
+          "title": "Evidence Store",
+          "detail": "保存 raw、summary、index、hash"
+        },
+        {
+          "title": "Report Assets",
+          "detail": "输出可审计报告素材"
+        }
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "title": "Session runtime",
+      "items": [
+        "daemon",
+        "create",
+        "action",
+        "status",
+        "finish",
+        "close"
+      ]
+    },
+    {
+      "title": "Debug actions",
+      "items": [
+        "backtrace",
+        "locals",
+        "registers",
+        "threads",
+        "evaluate",
+        "frame_select"
+      ]
+    },
+    {
+      "title": "Probe control",
+      "items": [
+        "breakpoint",
+        "watchpoint",
+        "catchpoint",
+        "probe enable",
+        "probe delete"
+      ]
+    },
+    {
+      "title": "Evidence flow",
+      "items": [
+        "raw MI",
+        "summary",
+        "index",
+        "raw hash",
+        "snapshot"
+      ]
+    },
+    {
+      "title": "Agent workflow",
+      "items": [
+        "hypothesis",
+        "replay",
+        "report",
+        "raw_mi escape hatch"
+      ]
+    }
+  ],
+  "flow": [
+    {
+      "title": "Describe",
+      "detail": "Task file 定义被调试目标"
+    },
+    {
+      "title": "Create",
+      "detail": "建立 live session"
+    },
+    {
+      "title": "Act",
+      "detail": "Agent 选择高层 action"
+    },
+    {
+      "title": "Observe",
+      "detail": "GDB/MI 返回 raw evidence"
+    },
+    {
+      "title": "Record",
+      "detail": "写入 evidence store"
+    },
+    {
+      "title": "Report",
+      "detail": "引用证据生成报告"
+    }
+  ],
+  "boundaries": [
+    {
+      "title": "No PTY",
+      "detail": "通过 GDB/MI 执行，不提供交互式终端会话"
+    },
+    {
+      "title": "No interactive stdin",
+      "detail": "inferior stdin 默认不是交互入口"
+    },
+    {
+      "title": "Replay scope",
+      "detail": "重放高层 action，不恢复旧 GDB 进程"
+    },
+    {
+      "title": "Raw MI",
+      "detail": "作为显式 escape hatch，而不是默认入口"
+    }
+  ]
+}

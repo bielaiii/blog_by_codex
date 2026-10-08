@@ -2,7 +2,7 @@
 
 这是一个纯静态个人博客模板，适合直接托管到 GitHub Pages。
 
-前端入口是 `app.js`；`modules/editor.js` 负责本地编辑器，`modules/markdown.js` 负责 Markdown 与公式渲染，`modules/data.js` 负责读取和刷新站点数据。浏览器直接加载原生 ES 模块，不需要构建步骤。
+前端入口是 `app.js`；路由、状态、归档、首页、项目展示和正文渲染分别由 `modules/` 中的模块负责。`shared/post-model.mjs` 在浏览器与 Node.js 间共用文章元数据规则；`scripts/lib/post-service.mjs` 统一处理文章写入。浏览器直接加载原生 ES 模块，无需打包工具；发布时由脚本生成索引并收集资源。详见 [架构与写入约定](docs/architecture.md)。
 
 ## 当前结构
 
@@ -55,7 +55,6 @@ node scripts/new-post.js "还没写完的文章" --draft
 
 ```bash
 node scripts/generate-posts.js
-node scripts/generate-post-metadata.js
 ```
 
 文章可以在文件开头写 frontmatter：
@@ -72,7 +71,7 @@ draft: false
 ---
 ```
 
-页面会读取自动生成的 `data/posts.json`。如果你需要集中覆盖标题、摘要、标签或栏目，可以在 `scripts/generate-posts.js` 的 `overrides` 里补配置。
+页面读取自动生成的 `data/catalog.json`，文章列表、日期和全文搜索索引来自同一份快照。`data/posts.json` 与 `data/post-metadata.json` 是兼容导出。标题、摘要、标签、栏目和布局统一在文章 frontmatter 中编辑，生成脚本不再覆盖这些字段。支持标量字段和行内字符串数组；无效 frontmatter 会报错。
 
 ## 草稿和隐藏文章
 
@@ -102,11 +101,13 @@ draft: false
 
 ## 文章布局
 
-默认文章是单列阅读。需要整篇文章使用左右两列时，在 `scripts/generate-posts.js` 的 `overrides` 里给文章加：
+默认文章是单列阅读。需要整篇文章使用左右两列时，在文章 frontmatter 中配置：
 
-```js
-layout: "two-column"
+```yaml
+layout: two-column
 ```
+
+编辑器预览与阅读页使用同一个渲染器，均支持两列布局。
 
 然后在 Markdown 里用标准 HTML 注释标记每一组左右对照：
 
@@ -153,7 +154,16 @@ Mermaid 适合表达结构关系；如果需要精确几何控制，建议用 La
 node scripts/check-site.js
 ```
 
-它会检查文章文件、重复 slug、两列文章的 `row/column` 标记、空 Mermaid 块和失效本地图片引用。
+它会检查文章元数据、生成索引版本、两列文章的 `row/column` 标记、空 Mermaid 块和失效本地资源引用。资源必须位于 `assets/` 或 `posts/`；相对路径按 Markdown 文件所在目录解释。发布脚本会收集图片、附件、引用式链接及 HTML 中的资源，缺失文件会使发布失败。
+
+回归检查：
+
+```bash
+node --test tests/architecture.test.mjs
+node scripts/check-browser-suite.mjs
+```
+
+浏览器检查需要 Chromium/Chrome：自动发现 Playwright 缓存中的 Chromium，或设置 `CHROME_PATH`。检查使用临时项目副本，覆盖直接编辑、口令解锁和 GitHub Pages 子路径下的静态阅读。
 
 ## 行内背景高亮
 
@@ -200,9 +210,9 @@ node scripts/check-site.js
 
 ## 分享文章的标签筛选
 
-`分享文章` 右侧会自动汇总 `app.js` 中文章元信息里的 `tags` 字段。新增文章时，只要在对应文章对象里写上：
+`分享文章` 右侧会自动汇总文章 frontmatter 中的 `tags` 字段。新增文章时写上：
 
-```js
+```yaml
 tags: ["Markdown", "代码"]
 ```
 
@@ -261,19 +271,18 @@ tags: ["Markdown", "代码"]
 
 `dateSource` 可选：
 
-- `generated`：读取 `data/post-metadata.json`，这个文件由 `scripts/generate-post-metadata.js` 从 Git 记录自动生成。
-- `metadata`：读取 `app.js` 文章元信息里的 `date` 字段。
+- `generated`：读取 `data/catalog.json` 中的日期元数据；生成脚本使用 Git 历史，并为尚未提交的文章保留稳定的创建时间。
+- `metadata`：读取文章 frontmatter 中的 `date` 字段。
 
 `generatedDateField` 可选：
 
 - `createdAt`：文章文件第一次进入 Git 的时间。
-- `updatedAt`：文章文件最近一次提交修改的时间。
+- `updatedAt`：文章最近一次保存或 Git 提交修改的时间。
 
 本仓库已经包含 GitHub Pages workflow。每次 push 到 `master` 时，会自动运行生成脚本并部署静态站点；本地需要手动刷新生成文件时，可以运行：
 
 ```bash
 node scripts/generate-posts.js
-node scripts/generate-post-metadata.js
 ```
 
 首页的 GitHub 风格更新格子图也读取这份生成文件，按 `updatedAt` 统计 `分享文章` 和 `项目` 两个栏目的更新。
@@ -452,7 +461,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-lan-
 
 Mac 直接打开 `http://192.168.0.102:8000/`，无需 SSH 隧道。Windows 本机仍用 `http://127.0.0.1:8000/`。两者都是同一个博客，支持草稿预览、创建、保存和删除文章。Windows 的 IP 变化时使用新地址。
 
-此配置将 HTTP 端口绑定到 `0.0.0.0`，允许局域网访问；防火墙只允许私人网络的本地子网。文章编辑不要求登录，适合信任的家庭局域网。服务器不提供 `.git`、`.local` 等隐藏目录，并拒绝来自其他网站的文章写入请求。配置保存在被 Git 忽略的 `.local/lan.json`，Windows 与 WSL 的部署及登录启动均读取它。镜像仍只使用本地镜像。
+此配置将 HTTP 端口绑定到 `0.0.0.0`，允许局域网阅读；防火墙只允许私人网络的本地子网。写入接口默认锁定，浏览器需在顶部输入编辑口令并点击“解锁编辑”。口令由服务启动时生成，保存在被 Git 忽略的 `.local/editor-token`；可在 Windows 项目目录运行 `Get-Content .local\editor-token` 查看，也可通过 `BLOG_EDITOR_TOKEN` 环境变量指定至少 24 个字符的口令。服务器使用 HttpOnly 会话 Cookie，12 小时后或重启后需要重新解锁。只读访问不会显示或提供草稿。服务器不提供 `.git`、`.local`、`scripts/` 等私有文件，并拒绝跨站写入请求。配置保存在 `.local/lan.json`，Windows 与 WSL 的部署及登录启动均读取它。镜像仍只使用本地镜像。
+
+直接运行 Node 服务并从本机回环地址访问时可以编辑；Docker 的端口转发可能需要同样输入口令。设置 `BLOG_EDITOR_ENABLED=false` 可关闭所有编辑接口（包括本机访问），Compose 支持此环境变量。
 
 关闭局域网 HTTP 访问（保留本机网页与 SSH）：
 

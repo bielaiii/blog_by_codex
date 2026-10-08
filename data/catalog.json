@@ -1,0 +1,691 @@
+{
+  "posts": [
+    {
+      "title": "博客文章效果与语法演示",
+      "date": "2026-10-06",
+      "summary": "这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 <! row 是一组左右对照，组内用 <! column 分隔左侧和右侧。 <! row 左侧可以放概念、图示、过程说明，右侧放对应代码或解...",
+      "tags": [],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "layout-features-demo",
+      "file": "posts/layout-features-demo.md",
+      "version": "2038fb9dfc66fc0682e0c2b6dd6fd25df42c00df43583b9bff733a1c19abc899"
+    },
+    {
+      "title": "segmented operation",
+      "date": "2026-10-06",
+      "summary": "head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5",
+      "tags": [],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "segmented-op",
+      "file": "posts/segmented-op.md",
+      "version": "c912728b81c1d6b9966843f2162ebcb857512ae05d0aa99c40d3f0a10d14458a"
+    },
+    {
+      "title": "Any-block reduce",
+      "date": "2026-06-24",
+      "summary": "任意block大小的reduce算法",
+      "tags": [],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "any-block-reduce",
+      "file": "posts/any-block-reduce.md",
+      "version": "e2bec34c46b3587a479cd7aded161973e5c1b4ba6859f96c2c30b5ada4e89dcb"
+    },
+    {
+      "title": "Blelloch scan",
+      "date": "2026-06-17",
+      "summary": "Belloch ",
+      "tags": [],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "blelloch-scan",
+      "file": "posts/blelloch-scan.md",
+      "version": "d22e752d919f1b4df51c935d093792ad8fe21893c699d9639475bedcde3e7a31"
+    },
+    {
+      "tab": "projects",
+      "title": "async_io_framework",
+      "date": "2026-06-15",
+      "summary": "一个基于 C++20 coroutine 与 Linux epoll 的异步 I/O 框架，已经覆盖 connect、accept、read/write、timer、timeout 与主动取消等核心路径。",
+      "tags": [
+        "C++",
+        "Coroutine",
+        "epoll",
+        "Async IO"
+      ],
+      "stage": "架构主线已成型：Coroutine -> Operation -> Scheduler -> epoll/timerfd/eventfd",
+      "stack": [
+        "C++20",
+        "coroutine",
+        "epoll",
+        "timerfd",
+        "eventfd"
+      ],
+      "metrics": [
+        "async I/O runtime",
+        "timeout/cancel",
+        "event arbitration"
+      ],
+      "repo": "https://github.com/bielaiii/async_io_framework",
+      "visual": "posts/projects/async_io_frame.json",
+      "slug": "async_io_frame",
+      "file": "posts/async_io_frame.md",
+      "layout": "single",
+      "version": "fb40694877c2ddff4ee544bb502b7942e8141462553534cee297b245feed9f5d",
+      "visualData": {
+        "eyebrow": "C++ coroutine async I/O runtime",
+        "repoLabel": "GitHub",
+        "sections": {
+          "architecture": "Coroutine、operation 与内核事件的分层",
+          "capabilities": "框架当前承接的异步能力",
+          "flow": "一次 async operation 的生命周期",
+          "boundaries": "运行时设计边界"
+        },
+        "architecture": [
+          {
+            "title": "Coroutine API",
+            "nodes": [
+              {
+                "title": "User Coroutine",
+                "detail": "以 co_await 组织异步读写流程"
+              },
+              {
+                "title": "async_* Awaiter",
+                "detail": "connect / accept / read / write / timer"
+              }
+            ]
+          },
+          {
+            "title": "Runtime Core",
+            "nodes": [
+              {
+                "title": "Operation State",
+                "detail": "仲裁 ready、timeout、cancel 的完成权"
+              },
+              {
+                "title": "Scheduler",
+                "detail": "维护 fd 到 pending operation 的映射"
+              },
+              {
+                "title": "Buffer View",
+                "detail": "管理读写偏移和剩余容量"
+              }
+            ]
+          },
+          {
+            "title": "Kernel Events",
+            "nodes": [
+              {
+                "title": "epoll",
+                "detail": "分发 socket readiness"
+              },
+              {
+                "title": "timerfd",
+                "detail": "驱动 wait_for 和 timeout"
+              },
+              {
+                "title": "eventfd",
+                "detail": "主动唤醒取消路径"
+              }
+            ]
+          }
+        ],
+        "capabilities": [
+          {
+            "title": "Socket I/O",
+            "items": [
+              "async_connect",
+              "async_accept",
+              "async_read",
+              "async_write",
+              "async_read_some"
+            ]
+          },
+          {
+            "title": "Timer",
+            "items": [
+              "wait_for",
+              "read timeout",
+              "write timeout",
+              "timer queue"
+            ]
+          },
+          {
+            "title": "Cancellation",
+            "items": [
+              "cancel_token",
+              "eventfd wakeup",
+              "operation_state arbitration"
+            ]
+          },
+          {
+            "title": "Scheduling",
+            "items": [
+              "fd readiness",
+              "read slot",
+              "write slot",
+              "epoll dispatch"
+            ]
+          },
+          {
+            "title": "Buffer",
+            "items": [
+              "StaticBuffer",
+              "DynamicBuffer",
+              "Buffer_View",
+              "offset tracking"
+            ]
+          }
+        ],
+        "flow": [
+          {
+            "title": "Await",
+            "detail": "coroutine 提交 async operation"
+          },
+          {
+            "title": "Register",
+            "detail": "Scheduler 注册 fd / timer / cancel interest"
+          },
+          {
+            "title": "Suspend",
+            "detail": "operation 挂起 coroutine"
+          },
+          {
+            "title": "Wake",
+            "detail": "epoll_wait 返回 socket、timer 或 cancel 事件"
+          },
+          {
+            "title": "Arbitrate",
+            "detail": "operation_state 决定完成结果"
+          },
+          {
+            "title": "Resume",
+            "detail": "coroutine 恢复并清理注册项"
+          }
+        ],
+        "boundaries": [
+          {
+            "title": "Thin Runtime",
+            "detail": "只包装 readiness，不隐藏底层事件模型"
+          },
+          {
+            "title": "Single Waiter",
+            "detail": "同一 socket fd 保持单读槽、单写槽"
+          },
+          {
+            "title": "Active Cancel",
+            "detail": "取消会唤醒 epoll，而不是等待下一次 socket ready"
+          },
+          {
+            "title": "Timer Dispatch",
+            "detail": "timerfd 当前按调度器事件推进，不是批量 dispatcher 模型"
+          }
+        ]
+      }
+    },
+    {
+      "tab": "projects",
+      "title": "gdb-agent",
+      "date": "2026-06-15",
+      "summary": "一个 vibe-coding 推出来的 GDB/MI 调试执行层，把调试动作、会话状态和证据资产组织成可审计的 evidence flow。",
+      "tags": [
+        "C++",
+        "GDB",
+        "Debugging",
+        "Vibe Coding"
+      ],
+      "stage": "架构主线已成型：Vibe Coding Loop -> Session -> Action -> Evidence -> Report",
+      "stack": [
+        "C++20",
+        "GDB/MI",
+        "daemon",
+        "JSONL",
+        "Markdown"
+      ],
+      "metrics": [
+        "vibe-coding",
+        "evidence flow",
+        "session runtime"
+      ],
+      "repo": "https://github.com/bielaiii/gdb_cli_tools",
+      "visual": "posts/projects/gdb_cli_tools.json",
+      "slug": "gdb_cli_tools",
+      "file": "posts/gdb_cli_tools.md",
+      "layout": "single",
+      "version": "74e3fa7bb161e751bb4906379158a78b0b89ca8f3eff3e63801556b365ffc6ce",
+      "visualData": {
+        "eyebrow": "Vibe-coded GDB/MI evidence runtime",
+        "repoLabel": "GitHub",
+        "sections": {
+          "architecture": "vibe-coding loop、session、action 与 evidence 的分层",
+          "capabilities": "调试会话暴露给 Agent 的操作面",
+          "flow": "一次调试动作的执行链路",
+          "boundaries": "GDB 执行层与 Agent 推理层的职责边界"
+        },
+        "architecture": [
+          {
+            "title": "Agent Layer",
+            "nodes": [
+              {
+                "title": "Vibe Coding Loop",
+                "detail": "用 Agent 快速提出假设、补动作、看证据"
+              },
+              {
+                "title": "Hypothesis",
+                "detail": "把直觉式探索沉淀成可追踪的问题链"
+              }
+            ]
+          },
+          {
+            "title": "Runtime Layer",
+            "nodes": [
+              {
+                "title": "Task File",
+                "detail": "描述 target、参数、工作目录、core"
+              },
+              {
+                "title": "Session",
+                "detail": "维护 live debugging 上下文"
+              },
+              {
+                "title": "Action Dispatcher",
+                "detail": "执行高层调试动作"
+              }
+            ]
+          },
+          {
+            "title": "Execution Layer",
+            "nodes": [
+              {
+                "title": "GDB/MI",
+                "detail": "稳定执行 debugger 指令"
+              },
+              {
+                "title": "Evidence Store",
+                "detail": "保存 raw、summary、index、hash"
+              },
+              {
+                "title": "Report Assets",
+                "detail": "输出可审计报告素材"
+              }
+            ]
+          }
+        ],
+        "capabilities": [
+          {
+            "title": "Session runtime",
+            "items": [
+              "daemon",
+              "create",
+              "action",
+              "status",
+              "finish",
+              "close"
+            ]
+          },
+          {
+            "title": "Debug actions",
+            "items": [
+              "backtrace",
+              "locals",
+              "registers",
+              "threads",
+              "evaluate",
+              "frame_select"
+            ]
+          },
+          {
+            "title": "Probe control",
+            "items": [
+              "breakpoint",
+              "watchpoint",
+              "catchpoint",
+              "probe enable",
+              "probe delete"
+            ]
+          },
+          {
+            "title": "Evidence flow",
+            "items": [
+              "raw MI",
+              "summary",
+              "index",
+              "raw hash",
+              "snapshot"
+            ]
+          },
+          {
+            "title": "Agent workflow",
+            "items": [
+              "hypothesis",
+              "replay",
+              "report",
+              "raw_mi escape hatch"
+            ]
+          }
+        ],
+        "flow": [
+          {
+            "title": "Describe",
+            "detail": "Task file 定义被调试目标"
+          },
+          {
+            "title": "Create",
+            "detail": "建立 live session"
+          },
+          {
+            "title": "Act",
+            "detail": "Agent 选择高层 action"
+          },
+          {
+            "title": "Observe",
+            "detail": "GDB/MI 返回 raw evidence"
+          },
+          {
+            "title": "Record",
+            "detail": "写入 evidence store"
+          },
+          {
+            "title": "Report",
+            "detail": "引用证据生成报告"
+          }
+        ],
+        "boundaries": [
+          {
+            "title": "No PTY",
+            "detail": "通过 GDB/MI 执行，不提供交互式终端会话"
+          },
+          {
+            "title": "No interactive stdin",
+            "detail": "inferior stdin 默认不是交互入口"
+          },
+          {
+            "title": "Replay scope",
+            "detail": "重放高层 action，不恢复旧 GDB 进程"
+          },
+          {
+            "title": "Raw MI",
+            "detail": "作为显式 escape hatch，而不是默认入口"
+          }
+        ]
+      }
+    },
+    {
+      "title": "博客文章效果与语法演示",
+      "date": "2026-06-14",
+      "summary": "集中展示两列对照布局、代码块折叠、行内高亮、术语提示和表格等文章写法。",
+      "tags": [
+        "Markdown",
+        "语法",
+        "示例"
+      ],
+      "tab": "articles",
+      "layout": "two-column",
+      "draft": false,
+      "slug": "layout_features_demo",
+      "file": "posts/layout_features_demo.md",
+      "version": "b394de5c06f87c6daf39a72416b45044270d05bed94ee8e20fb8c5c164994c05"
+    },
+    {
+      "title": "cuda常用parallel primitives操作",
+      "date": "2026-06-14",
+      "summary": "整理 CUDA 中常见的 parallel primitives：reduce、scan、stencil、gather、scatter、sort、map、partition、compact 等操作。",
+      "tags": [
+        "CUDA",
+        "并行算法"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "parallel_primitives",
+      "file": "posts/parallel_primitives.md",
+      "version": "6805292c05594cff76c6cbcf6d422c1c1ca99f7206bdafcf808b76b701a6c1eb"
+    },
+    {
+      "title": "segmented operation",
+      "date": "2026-06-14",
+      "summary": "用 inclusive segmented scan 的 CUDA 示例理解 head flag 如何传播，以及为什么每个线程能在不跨段的情况下累计前缀和。",
+      "tags": [
+        "CUDA",
+        "并行算法",
+        "Scan"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "segmented_op",
+      "file": "posts/segmented_op.md",
+      "version": "1c784a2db6ab9f88e37c14ae04132d9c954a51b6699071e4c03edd8f98ef5166"
+    },
+    {
+      "title": "Hillis-Steele scan",
+      "date": "2026-06-12",
+      "summary": "用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。",
+      "tags": [
+        "CUDA",
+        "并行算法",
+        "Scan"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "Hillis-Steele_scan",
+      "file": "posts/Hillis-Steele_scan.md",
+      "version": "10e4a8cd09dfbc28eb142511989a752017c0814ef803b2b692ff70d2abca12cd"
+    },
+    {
+      "title": "为什么 reduce 和 scan 能刚好处理数组",
+      "date": "2026-06-12",
+      "summary": "从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。",
+      "tags": [
+        "并行算法",
+        "Reduction",
+        "Scan"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "why_tree_reduction_and_scan_work",
+      "file": "posts/why_tree_reduction_and_scan_work.md",
+      "version": "bb9d380b9f7883de8ba5feb3cb446a81c4a24bff93bfec25356dedc9d691f6cf"
+    },
+    {
+      "title": "个人简历",
+      "date": "2026-03-29",
+      "summary": "",
+      "tags": [],
+      "tab": "resume",
+      "layout": "single",
+      "draft": false,
+      "slug": "resume-profile",
+      "file": "posts/resume-profile.md",
+      "version": "6670366241e3853113a0736429078d989ab4569e9616834b400c57f0c17d507e"
+    },
+    {
+      "title": "把个人博客搭成一个长期写作入口",
+      "date": "2026-03-28",
+      "summary": "从结构、样式和部署方式出发，建立一个能长期维护的静态博客。文章归档页先显示标题和预览，点进去再阅读完整内容。",
+      "tags": [
+        "博客",
+        "GitHub Pages",
+        "Markdown"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "first-post",
+      "file": "posts/first-post.md",
+      "version": "d3bbb6027baaf2c9891965ab701f517cd8fd8091f2bd116473e8c0beeea25626"
+    },
+    {
+      "title": "个人项目页应该像一个实时项目档案",
+      "date": "2026-03-24",
+      "summary": "项目不仅展示结果，也展示阶段、状态和下一步。归档页先看简介，点开后再看完整项目笔记，更符合 dashboard 的浏览节奏。",
+      "tags": [
+        "项目",
+        "Dashboard",
+        "设计"
+      ],
+      "tab": "projects",
+      "layout": "single",
+      "draft": false,
+      "slug": "project-blueprint",
+      "file": "posts/project-blueprint.md",
+      "version": "62d001e160d289cccb96e3cd36b5daf5a5301c0d083f87f52fdee23ea81e5048"
+    },
+    {
+      "title": "Markdown 与代码高亮的展示示例",
+      "date": "2026-03-20",
+      "summary": "这篇文章用来验证标题、列表、引用、表格和代码块等常见内容的展示效果，也适合演示分享型文章的归档样式。",
+      "tags": [
+        "Markdown",
+        "代码",
+        "示例"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "code-snippet-demo",
+      "file": "posts/code-snippet-demo.md",
+      "version": "07f217d6ba488ed0ba551b27fc99d0979c5fc264bc4bd0fa628f8861d8db5a66"
+    },
+    {
+      "title": "给持续写作保留一点轻量流程",
+      "date": "2026-03-12",
+      "summary": "文章越容易落地，博客越容易持续更新。流程轻一点，内容反而更稳定，也更适合放进个人文章归档。",
+      "tags": [
+        "写作",
+        "流程"
+      ],
+      "tab": "articles",
+      "layout": "single",
+      "draft": false,
+      "slug": "writing-workflow",
+      "file": "posts/writing-workflow.md",
+      "version": "7cdcd53e37875d9b309e47deb4c2fa57cbb346508774bfbcbc9edc346c03090d"
+    }
+  ],
+  "postMetadata": {
+    "Hillis-Steele_scan": {
+      "file": "posts/Hillis-Steele_scan.md",
+      "createdAt": "2026-06-12T19:06:31+08:00",
+      "updatedAt": "2026-06-12T19:06:31+08:00",
+      "version": "10e4a8cd09dfbc28eb142511989a752017c0814ef803b2b692ff70d2abca12cd"
+    },
+    "any-block-reduce": {
+      "file": "posts/any-block-reduce.md",
+      "createdAt": "2026-06-24T18:00:02+08:00",
+      "updatedAt": "2026-07-23T21:27:00+08:00",
+      "version": "e2bec34c46b3587a479cd7aded161973e5c1b4ba6859f96c2c30b5ada4e89dcb"
+    },
+    "async_io_frame": {
+      "file": "posts/async_io_frame.md",
+      "createdAt": "2026-06-16T18:04:23+08:00",
+      "updatedAt": "2026-06-16T18:04:23+08:00",
+      "version": "fb40694877c2ddff4ee544bb502b7942e8141462553534cee297b245feed9f5d"
+    },
+    "blelloch-scan": {
+      "file": "posts/blelloch-scan.md",
+      "createdAt": "2026-06-24T18:00:02+08:00",
+      "updatedAt": "2026-07-23T21:27:00+08:00",
+      "version": "d22e752d919f1b4df51c935d093792ad8fe21893c699d9639475bedcde3e7a31"
+    },
+    "code-snippet-demo": {
+      "file": "posts/code-snippet-demo.md",
+      "createdAt": "2026-03-28T17:14:43+08:00",
+      "updatedAt": "2026-06-12T19:06:31+08:00",
+      "version": "07f217d6ba488ed0ba551b27fc99d0979c5fc264bc4bd0fa628f8861d8db5a66"
+    },
+    "first-post": {
+      "file": "posts/first-post.md",
+      "createdAt": "2026-03-28T17:14:43+08:00",
+      "updatedAt": "2026-05-14T01:45:07+08:00",
+      "version": "d3bbb6027baaf2c9891965ab701f517cd8fd8091f2bd116473e8c0beeea25626"
+    },
+    "gdb_cli_tools": {
+      "file": "posts/gdb_cli_tools.md",
+      "createdAt": "2026-06-16T18:04:23+08:00",
+      "updatedAt": "2026-06-16T18:04:23+08:00",
+      "version": "74e3fa7bb161e751bb4906379158a78b0b89ca8f3eff3e63801556b365ffc6ce"
+    },
+    "layout-features-demo": {
+      "file": "posts/layout-features-demo.md",
+      "createdAt": "2026-06-14T03:32:08+08:00",
+      "updatedAt": "2026-06-16T18:04:23+08:00",
+      "version": "2038fb9dfc66fc0682e0c2b6dd6fd25df42c00df43583b9bff733a1c19abc899"
+    },
+    "layout_features_demo": {
+      "file": "posts/layout_features_demo.md",
+      "createdAt": "2026-06-14T03:32:08+08:00",
+      "updatedAt": "2026-06-16T18:04:23+08:00",
+      "version": "b394de5c06f87c6daf39a72416b45044270d05bed94ee8e20fb8c5c164994c05"
+    },
+    "parallel_primitives": {
+      "file": "posts/parallel_primitives.md",
+      "createdAt": "2026-06-12T19:06:31+08:00",
+      "updatedAt": "2026-06-12T19:44:32+08:00",
+      "version": "6805292c05594cff76c6cbcf6d422c1c1ca99f7206bdafcf808b76b701a6c1eb"
+    },
+    "project-blueprint": {
+      "file": "posts/project-blueprint.md",
+      "createdAt": "2026-03-28T17:14:43+08:00",
+      "updatedAt": "2026-03-28T17:14:43+08:00",
+      "version": "62d001e160d289cccb96e3cd36b5daf5a5301c0d083f87f52fdee23ea81e5048"
+    },
+    "resume-profile": {
+      "file": "posts/resume-profile.md",
+      "createdAt": "2026-03-29T15:55:53+08:00",
+      "updatedAt": "2026-03-29T17:08:18+08:00",
+      "version": "6670366241e3853113a0736429078d989ab4569e9616834b400c57f0c17d507e"
+    },
+    "segmented-op": {
+      "file": "posts/segmented-op.md",
+      "createdAt": "2026-06-12T19:06:31+08:00",
+      "updatedAt": "2026-06-16T18:04:23+08:00",
+      "version": "c912728b81c1d6b9966843f2162ebcb857512ae05d0aa99c40d3f0a10d14458a"
+    },
+    "segmented_op": {
+      "file": "posts/segmented_op.md",
+      "createdAt": "2026-06-12T19:06:31+08:00",
+      "updatedAt": "2026-06-12T19:44:32+08:00",
+      "version": "1c784a2db6ab9f88e37c14ae04132d9c954a51b6699071e4c03edd8f98ef5166"
+    },
+    "why_tree_reduction_and_scan_work": {
+      "file": "posts/why_tree_reduction_and_scan_work.md",
+      "createdAt": "2026-06-12T19:06:31+08:00",
+      "updatedAt": "2026-06-12T19:06:31+08:00",
+      "version": "bb9d380b9f7883de8ba5feb3cb446a81c4a24bff93bfec25356dedc9d691f6cf"
+    },
+    "writing-workflow": {
+      "file": "posts/writing-workflow.md",
+      "createdAt": "2026-03-28T17:14:43+08:00",
+      "updatedAt": "2026-05-14T01:45:07+08:00",
+      "version": "7cdcd53e37875d9b309e47deb4c2fa57cbb346508774bfbcbc9edc346c03090d"
+    }
+  },
+  "searchText": {
+    "Hillis-Steele_scan": "Hillis-Steele scan 用区间不变量理解 Hillis-Steele scan 中 offset 按 1、2、4、8 翻倍时，为什么每个 scratch 元素仍然能得到正确处理。 CUDA 并行算法 Scan Hillis-Steele scan 伪代码 cpp for (int offset = 1; offset = offset) { add = scratch[tid - offset]; } syncthreads(); scratch[tid] += add; syncthreads(); } 为什么对于循环中，offset的一直是 scratch[i] 可以记住 sum[i ... i] 第一轮处理 k = 0 ， offset = 1 每一个线程做 scratch[i] += scratch[i - 1] 此时 scratch[i] = sum(a[i-1 ... i]) 第二轮处理 k = 1, offset = 2 上一轮结束时 cpp scratch[i] = sum(a[i-1...i]) scratch[i-2] = sum(a[i-3 ... i-2]) 这一轮 cpp scratch[i] += scratch[i-1] = sum(a[i-1 ... i]) + sum(a[i-3 ... i-2]) = sum(a[i-3 ... i]) 第三轮处理 k = 2, offset = 4 上一轮结束时 cpp scratch[i] = sum(a[i-3...i]) scratch[i-4] = sum(a[i-7 ... i-4]) 这一轮 cpp scratch[i] += scratch[i-4] = sum(a[i-3 ... i]) + sum(a[i-7 ... i-4]) = sum(a[i-7 ... i]) --- 所以一般来说，对于任意k， $offset = 2^k$ 上一轮结束时 cpp scratch[i] = sum(a[i-offset + 1 ... i]) scratch[i - offset] = sum(a[i- 2 offset + 1 ... i - offset]) 这一轮时 cpp scratch[i] += scratch[i - offset] scrtach[i] = sum(a[i-offset + 1 ... i]) + sum(a[i- 2 offset + 1 ... i - offset]) scratch[i] = sum(a[i- 2 offset + 1 ... i]) 所以每一轮更新后 scratch[i] 保存的是长度最多为 $2 \\cdot offset$的区间和 --- 更形式化一点 当 k 轮结束后 cpp offset = 1, 2, 4, 8, ... 2^k cpp scratch[i] = sum(max(0, a[i - (2^{k+1} + 1) ... i])) 也就是说，每一轮结束之后，每个scratch[i]保存的事 〉最多 2^{k+1}的长度区间和 轮数 offset 结束后 scratch[i] 的意义 ------- -----: ------------------------ 初始化 - a[i] 第 0 轮 1 a[i-1] + a[i] 第 1 轮 2 a[i-3] + ... + a[i] 第 2 轮 4 a[i-7] + ... + a[i] 第 3 轮 8 a[i-15] + ... + a[i] 边界处如果 i - offset < 0, 则不做任何操作，因为左边已经没有元素了。 ---",
+    "any-block-reduce": "Any-block reduce 任意block大小的reduce算法 cpp int active = blockDim.x; while (active 1) { int half = active / 2; if (tid < half) { scratch[tid] += scratch[tid + half]; } if ((active & 1) && tid == 0) { scratch[0] += scratch[active - 1]; } syncthreads(); active = half; } 为什么any-block reduce只额外考虑一个元素？ reduce本来就是二分操作，对于任意$N$，要么$N = 2M$，要么$N = 2M + 1$，对于每一轮reduce，我们只需要判断当前的长度是否能被2整除，对于能整除的部分，正常做reduce，如果还需要$N = 2M + 1$，只需要再处理最后一个元素即可。",
+    "async_io_frame": "async io framework 一个基于 C++20 coroutine 与 Linux epoll 的异步 I/O 框架，已经覆盖 connect、accept、read/write、timer、timeout 与主动取消等核心路径。 C++ Coroutine epoll Async IO async io framework 这是一个偏底层的 C++ async I/O framework。它的展示重点不应该是“做了一个网络库”，而应该是：如何把 socket readiness、coroutine suspension、timer、timeout 和 cancellation 放进同一个调度模型里。 项目仓库：bielaiii/async io framework 项目定位 这个项目目前更像一个“异步运行时骨架”，核心目标是用尽量薄的抽象包住 Linux I/O readiness，同时保留 coroutine 风格的可组合性。 README 里已经标记完成的能力包括： - async connect - async accept - async write - async read - timer / wait for - async read some - 异步读写取消 核心结构 mermaid flowchart LR User[\"user coroutine\"] -- Awaiter[\"async awaiter\"] Awaiter -- State[\"operation state\"] State -- Scheduler[\"Scheduler\"] Scheduler -- Epoll[\"Epoll Manager\"] Epoll -- Kernel[\"epoll wait\"] Kernel -- Scheduler Scheduler -- State State -- User Timer[\"TimerEvent / timerfd\"] -- Scheduler Cancel[\"cancel token / eventfd\"] -- Scheduler 这一层关系很适合在项目页里展示，因为它能解释项目的真实难点：不是“调用 epoll”，而是多个事件源同时竞争同一个 coroutine 的完成权。 能力矩阵 能力 当前状态 说明 --- --- --- connect / accept 已支持 面向 socket 建连与接入 read / write 已支持 通过 Scheduler 注册 fd readiness read some 已支持 不要求填满 buffer timeout 已支持 I/O 操作可与 timer 竞争 wait for 已支持 coroutine 级 timer await cancellation 已支持 使用 eventfd 主动唤醒 scheduler single read/write waiter 当前限制 同一 socket fd 保持单读槽、单写槽 调度路径 Scheduler 维护 fd 到 pending operation 的关系。socket fd 目前是简单的单读槽、单写槽模型： text socket fd - read op socket fd - write op 当 epoll wait 返回事件后，scheduler 会根据 EPOLLIN / EPOLLOUT / ERR / HUP 找到对应 operation，并调用 complete() 让 coroutine 恢复。 这个设计适合展示成项目卡片里的“核心抽象”，因为它很清楚地说明了框架边界： - scheduler 只负责 readiness dispatch - operation state 负责完成结果仲裁 - coroutine 负责恢复后做清理和返回结果 取消设计 仓库里的 active cancellation 设计文档很关键。它不是简单设一个 cancelled flag，而是让 cancel token 持有一个 eventfd ： text request cancel() - write(cancel eventfd) - epoll wait 被唤醒 - Scheduler dispatch cancel read op - operation state 尝试变成 CANCELLED - coroutine resume 并清理 fd interest 这个设计比 lazy cancellation 更适合 I/O 场景，因为一个 pending read/write 之后可能再也没有 socket readiness。如果取消不能唤醒 epoll wait ，coroutine 就可能永远没有机会观察到取消请求。 Timer 设计 timer 部分现在使用一个 Linux timerfd 驱动多个 coroutine timer。设计文档里已经记录了一个重要演进点： - 当前模型会把当前 timer task 暴露给 scheduler - timerfd 事件按调度器事件推进 - 不把多个 expired timers 包装成单独的批量 dispatcher 这说明项目已经开始进入“事件循环内部质量”的问题，而不只是 API 层演示。 测试覆盖 仓库目前有 Catch2 单元测试，已经覆盖了几条关键路径： - async read 能读取已经 ready 的 fd - async write 能写完整个 buffer - async connect 能连接本地 TCP listener - wait for 能完成 timer await - async read timeout 能返回 timeout - cancellation 能让 pending read 以 cancelled 结束 - StaticBuffer / DynamicBuffer / Buffer View 的 offset、remain、reuse 行为 这些测试很适合在项目页里单独展示，因为它们能让读者快速判断：这个项目已经有真实行为验证，而不是只有接口草图。 展示建议 项目 tab 里这个项目应该用“系统框架卡片”展示： - 标题： async io framework - 一句话：C++20 coroutine + epoll 的 async I/O framework - 标签： coroutine 、 epoll 、 timerfd 、 eventfd 、 Catch2 - 指标： async I/O runtime 、 timeout/cancel 、 event arbitration - 入口：GitHub 仓库 详情页则不要写成长教程，而是保持这个结构：定位、核心结构、能力矩阵、调度路径、取消设计、timer 设计、测试覆盖。",
+    "blelloch-scan": "Blelloch scan Belloch cpp for (int offset = 1; offset = 1; offset = 1) { parallel for i: int right = (i + 1) offset 2 - 1; int left = right - offset; if (right up-sweep: 构造区间和 第二阶段 down-sweep: 把区间和转换成每个位置的前缀和 --- 用例 cpp x = [a, b, c, d, e, f, g, h] 第一阶段： 构造区间和 reduce操作求和，最后 第一步 cpp x[1] += x[0]; x[3] += x[2]; x[5] += x[4]; x[7] += x[6]; 得到 text [a, a+b, c, c+d, e, e+f, g, g+h] 第二步 cpp x[3] += x[1]; x[7] += x[5]; 得到 text [a, a+b, c, a+b+c+d, e, e+f, g, e+f+g+h] 第三步 cpp x[7] += x[3]; 得到 text [a, a+b, c, a+b+c+d, e, e+f, g, a+b+c+d+e+f+g+h] --- 第二阶段 第一步 cpp x[n - 1] = 0; 此时， text [a, a+b, c, a+b+c+d, e, e+f, g, 0] down-sweep操作 cpp t = x[left]; x[left] = x[right]; x[right] = x[right] + t; --- 明确概念 区间I = [left, right) 左区间 = [left, mid) 右区间 = [mid, right) --- 在up-sweep时，我们已经构造二叉树的和，对于每一个区间，我们有 cpp x[left] = 父区间I的sum[left, mid) x[right] = 父区间I的sum[left, right) 在每一步 down-sweep 操作前，我们有 cpp x[left] = sum[left, mid) x[right] = I的前缀和， 即sum[0, left) 为什么要单独有x[n-1] = 0 ？ x作为一整个完整的区间I，前面已经没有和了，sum[before 0, 0) = 0 现在分析 down-sweep 操作的每一步的意义 cpp t = x[left] 保存x[left],即父区间I的sum[left, right) cpp x[left] = x[right]; 此时 x[left] = sum[0, right) cpp x[right] = x[right] + t $$x[right] = x[right] + t$$ $$x[right] = sum[0, left) + sum[left, right)$$ $$x[right] = sum[0, right)$$ --- down-sweep 是会覆盖数组的，那在处理当前区间 [l,r) 之前，为什么 x[left] 还没被覆盖，仍然是 up-sweep 留下来的 sum[l,mid)？ 类似的问题，是不是正是因为up-sweep中，$offset=2^s$, down-sweep中$offset=2^s$且为up-sweep的逆向操作，所以总是可以正确获取到up-sweep保存的区间和的值？ 因为 down-sweep 是从大区间往小区间处理的；在处理 offset = d 之前，只覆盖过“长度大于 d 的区间 root”。而 x[left] 是长度 d 的左子区间 root，所以还没轮到它被覆盖。 --- 假设当前down-sweep的offset = d 当前父区间是[l, r) = [l, l + 2d) 所以 text mid = l + d left = mid - 1 // 左子区间的root right = r - 1 // 父区间/右子区间的root 这时候 cpp x[left] 是长度d的区间[l, mid)的root， 即sum[l, mid) 而down-sweep的处理顺序是： cpp offset = B/2, B/4, B/8 ... 1 先处理大区间，再处理小区间 在处理offset = d之前，已经处理过的offset是 cpp offset = B/2, B/4, B/8 ... 2d 所以长度为d的区间，root，也就是当前的x[left]仍然是up-sweep保存中的 cpp x[left] = sum[l, mid) 所以x[left]总是up-sweep的值，而x[right]会在down-sweep中得到正确的更新，最终不影响算法的正确性 Blelloch scan要求计算的逻辑长度是2的幂(参考$offset = 2^s$) 数学证明中则要求 $$offset=k^s$$ ，而数组长度则要满足 $$km$$",
+    "code-snippet-demo": "Markdown 与代码高亮的展示示例 这篇文章用来验证标题、列表、引用、表格和代码块等常见内容的展示效果，也适合演示分享型文章的归档样式。 Markdown 代码 示例 Markdown 与代码高亮的展示示例 这是一篇专门用来做展示测试的文章，方便确认博客的排版是否稳定。 列表 - 无序列表适合记要点 - 有序列表适合写步骤 - 行距应该足够舒展，但不能过松 引用 好的博客设计不会抢内容的注意力，但也不能弱到没有个性。 行内背景高亮 这是一段普通正文，这段文字会使用默认高亮，也可以写成 蓝色背景高亮 或 警示背景高亮。 表格 能力 当前支持 --- --- Markdown 文章 支持 时间线列表 支持 代码高亮 支持 GitHub Pages 部署 支持 代码块 ts type Post = { slug: string; title: string; date: string; summary: string; tags: string[]; file: string; }; function sortPosts(posts: Post[]) { return posts.sort((a, b) = { return new Date(b.date).getTime() - new Date(a.date).getTime(); }); } 内联代码 比如 posts/ 用来存文章， slug 用来切换路由， highlight.js 用来处理高亮。",
+    "first-post": "把个人博客搭成一个长期写作入口 从结构、样式和部署方式出发，建立一个能长期维护的静态博客。文章归档页先显示标题和预览，点进去再阅读完整内容。 博客 GitHub Pages Markdown 把个人博客搭成一个长期写作入口 如果博客只是一个展示页，它通常会停在“做完”的状态；如果博客是一个稳定的写作入口，它才更容易持续更新。 这次的目标很明确： - 可以直接托管在 GitHub Pages - 首页按时间线展示文章 - 文章本身使用 Markdown 编写 - 代码块有正常高亮 - 风格克制，但不能显得模板化 为什么选纯静态 这个项目没有引入额外的构建工具，部署成本会更低。你只需要把仓库推到 GitHub，然后开启 Pages，就可以直接访问。 对于个人博客来说，这种方案的优点很实际： 1. 结构简单，迁移方便 2. 没有服务端维护成本 3. 文章就是普通 Markdown 文件 4. 以后改成别的生成器也容易 时间线首页的作用 我不希望首页只是机械地列卡片。时间线更像写作历史，它天然适合博客这种“持续产生内容”的场景。 当文章数量变多后，时间线仍然能保持清晰的浏览顺序。 一段代码示例 js const publish = async (post) = { const response = await fetch(post.file); const markdown = await response.text(); return marked.parse(markdown); }; 后续你只需要继续往 posts/ 目录里增加文章，在文章开头的 frontmatter 中填写元信息，再运行生成脚本，就能把博客持续写下去。",
+    "gdb_cli_tools": "gdb-agent 一个 vibe-coding 推出来的 GDB/MI 调试执行层，把调试动作、会话状态和证据资产组织成可审计的 evidence flow。 C++ GDB Debugging Vibe Coding gdb-agent gdb-agent 是 vibe-coding 推出来的调试工具：先让 Agent 快速提出假设和动作，再让工具稳定执行 GDB/MI、维护 session、保存 evidence，并生成可审计的报告资产。 项目仓库：bielaiii/gdb cli tools Architecture mermaid flowchart TB Agent[\"AI Agent\"] -- Plan[\"hypothesis / next action\"] Plan -- Runtime[\"gdb-agent runtime\"] subgraph RuntimeBox[\"gdb-agent\"] Task[\"task file\"] Session[\"live session\"] Action[\"action dispatcher\"] Evidence[\"evidence store\"] Replay[\"replay log\"] Report[\"report builder\"] end Runtime -- Task Task -- Session Session -- Action Action -- GDB[\"GDB/MI\"] GDB -- Evidence Evidence -- Agent Evidence -- Report Action -- Replay 这张图是项目的主体： gdb-agent 位于 Agent 和 GDB/MI 之间，不抢推理职责，只稳定地执行动作、收集证据、沉淀会话。 Capabilities mermaid mindmap root((gdb-agent)) Session create status finish close daemon Debug Actions backtrace locals registers threads evaluate frame select Probes breakpoint watchpoint catchpoint Evidence raw MI summary index hash Reasoning Aid hypothesis replay report 功能展示可以按“面向 Agent 的能力面”来组织，而不是堆命令清单： 能力面 支持内容 --- --- Session runtime daemon、create、action、status、finish、close Debug action backtrace、locals、registers、threads、evaluate、frame select Probe control breakpoint、watchpoint、catchpoint、probe enable/disable/delete Evidence flow raw MI、低噪声 summary、index、raw hash Agent workflow hypothesis create/check/conclude、replay、report Flow mermaid sequenceDiagram participant A as Agent participant T as Task participant S as Session participant G as GDB/MI participant E as Evidence participant R as Report A- T: describe target A- S: create session A- S: choose action S- G: execute MI command G-- S: raw result S- E: store raw + summary E-- A: evidence view A- S: next action / hypothesis A- R: finish E- R: evidence index 这个 flow 说明了项目最重要的边界：Agent 可以多轮探索，但每一步都落在 session log 和 evidence store 里。最后报告不是凭空生成，而是引用已经保存的证据。 Boundaries mermaid flowchart LR Tool[\"gdb-agent records evidence\"] -- Agent[\"Agent interprets evidence\"] Agent -- Conclusion[\"root-cause conclusion\"] Tool -- Assets[\"raw MI / summary / replay / report assets\"] 设计边界保持清楚： - 目标平台是 Linux。 - 调试执行通过 GDB/MI，不走 PTY。 - raw mi 是 escape hatch，而不是默认交互方式。 - replay 重放的是高层 action，不是恢复旧 GDB 进程。 - 工具记录证据，最终根因判断属于 Agent。",
+    "layout-features-demo": "博客文章效果与语法演示 这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 是一组左右对照，组内用 分隔左侧和右侧。 1. 两列对照布局 左侧可以放概念、图示、过程说明，右侧放对应代码或解释。 text 左侧内容 右侧内容 每一组 row 会独立对齐，不会出现“左边写完再轮到右边”的阅读错位。 对应语法 md 左侧标题 这里写左侧内容。 右侧标题 这里写右侧内容。 这种写法本质上仍然是标准 Markdown 加 HTML 注释，兼容性比自定义代码块更好。 2. 代码块与折叠 普通代码块会自动高亮，并在左上角显示折叠按钮。 cpp for (int offset = 1; offset = offset) { add = scratch[tid - offset]; } syncthreads(); scratch[tid] += add; syncthreads(); } 对应语法 md cpp for (int offset = 1; offset 3. 行内高亮 可以用 内容 标出重点，也可以指定颜色： - 默认高亮 - 蓝色高亮 - 警示高亮 适合标出循环不变量、关键边界条件或一段证明里的核心结论。 对应语法 md 默认高亮 蓝色高亮 警示高亮 高亮颜色来自 data/highlight-styles.json 。 4. 行内术语提示 如果 posts/tooltips.json 里配置了术语解释，可以在正文里写： scan prefix sum 鼠标悬停或键盘聚焦时会看到提示。 对应语法 md scan 显示文字 第一种写法用显示文字当 key；第二种写法可以把显示文字和 key 分开。 5. 表格 轮数 offset 覆盖范围 ---- -----: -------- 0 1 2 个元素 1 2 4 个元素 2 4 8 个元素 表格适合展示算法每轮状态变化。 对应语法 md 轮数 offset 覆盖范围 ---- -----: -------- 0 1 2 个元素 1 2 4 个元素 2 4 8 个元素 列对齐符号里的 : 可以控制文字对齐方向。 6. Mermaid 图 Mermaid 适合快速画流程图、依赖图和状态图。 mermaid graph LR A[输入数组] -- B[offset = 1] B -- C[offset = 2] C -- D[offset = 4] D -- E[得到前缀和] 对应语法 md mermaid graph LR A[输入数组] -- B[offset = 1] B -- C[offset = 2] C -- D[offset = 4] D -- E[得到前缀和] 它更适合表达结构关系，不适合像 TikZ 那样做精确几何绘图。",
+    "layout_features_demo": "博客文章效果与语法演示 集中展示两列对照布局、代码块折叠、行内高亮、术语提示和表格等文章写法。 Markdown 语法 示例 博客文章效果与语法演示 这篇文章专门用来展示博客支持的写法。它使用两列布局：每一个 是一组左右对照，组内用 分隔左侧和右侧。 1. 两列对照布局 左侧可以放概念、图示、过程说明，右侧放对应代码或解释。 text 左侧内容 右侧内容 每一组 row 会独立对齐，不会出现“左边写完再轮到右边”的阅读错位。 对应语法 md 左侧标题 这里写左侧内容。 右侧标题 这里写右侧内容。 这种写法本质上仍然是标准 Markdown 加 HTML 注释，兼容性比自定义代码块更好。 2. 代码块与折叠 普通代码块会自动高亮，并在左上角显示折叠按钮。 cpp for (int offset = 1; offset = offset) { add = scratch[tid - offset]; } syncthreads(); scratch[tid] += add; syncthreads(); } 对应语法 md cpp for (int offset = 1; offset 3. 行内高亮 可以用 内容 标出重点，也可以指定颜色： - 默认高亮 - 蓝色高亮 - 警示高亮 适合标出循环不变量、关键边界条件或一段证明里的核心结论。 对应语法 md 默认高亮 蓝色高亮 警示高亮 高亮颜色来自 data/highlight-styles.json 。 4. 行内术语提示 如果 posts/tooltips.json 里配置了术语解释，可以在正文里写： scan prefix sum 鼠标悬停或键盘聚焦时会看到提示。 对应语法 md scan 显示文字 第一种写法用显示文字当 key；第二种写法可以把显示文字和 key 分开。 5. 表格 轮数 offset 覆盖范围 ---- -----: -------- 0 1 2 个元素 1 2 4 个元素 2 4 8 个元素 表格适合展示算法每轮状态变化。 对应语法 md 轮数 offset 覆盖范围 ---- -----: -------- 0 1 2 个元素 1 2 4 个元素 2 4 8 个元素 列对齐符号里的 : 可以控制文字对齐方向。 6. Mermaid 图 Mermaid 适合快速画流程图、依赖图和状态图。 mermaid graph LR A[输入数组] -- B[offset = 1] B -- C[offset = 2] C -- D[offset = 4] D -- E[得到前缀和] 对应语法 md mermaid graph LR A[输入数组] -- B[offset = 1] B -- C[offset = 2] C -- D[offset = 4] D -- E[得到前缀和] 它更适合表达结构关系，不适合像 TikZ 那样做精确几何绘图。",
+    "parallel_primitives": "cuda常用parallel primitives操作 整理 CUDA 中常见的 parallel primitives：reduce、scan、stencil、gather、scatter、sort、map、partition、compact 等操作。 CUDA 并行算法 cuda常用parallel primitives操作 reduce 规约 scan 前缀X合作 stencil 每个 output[i] 依赖 input 附近的一小片邻居 gather 每个线程从某个指定位置读取 scatter 每个线程把自己的值写到某个目标位置 sort 排序 map 对每个元素做相同的操作 Partition 负数放左边，正数放右边 Compact 把保留的元素挤到前面，去掉空洞 Filter 只保留满足条件的元素 Transform-Reduce 先 map，再 reduce Transform-Scan 先 map，再 scan Prefix / Suffix prefix 是前缀，scan 通常就是 prefix operation。 suffix 是后缀，从右往左累计 Broadcast 一个值扩展/应用到很多元素 Tile / Tiling 把大问题切成小块，每个 block 处理一个 tile",
+    "project-blueprint": "个人项目页应该像一个实时项目档案 项目不仅展示结果，也展示阶段、状态和下一步。归档页先看简介，点开后再看完整项目笔记，更符合 dashboard 的浏览节奏。 项目 Dashboard 设计 个人项目页应该像一个实时项目档案 如果项目栏目只是简单放几个截图，它更像作品展示；如果它把阶段、状态和下一步放在一起，它才更像一个 dashboard。 项目栏目可以展示什么 - 项目简介与目标 - 当前进度与最近更新 - 技术栈与关键决策 - 下一阶段计划 为什么这类页面适合放在博客里 项目本身是持续变化的，而博客天然适合记录变化。把项目写成一条条带时间的记录，阅读体验会比“静态作品集”更完整。 一个简单结构 md 项目标题 当前状态 - 正在设计 - 开发中 - 已上线 关键记录 - 为什么这样做 - 改过什么 - 下一步做什么 这样项目页会更像真实工作的档案，而不只是结论页。",
+    "resume-profile": "个人简历 个人简历 基本信息 项目 内容 --- --- 姓名 陈翔 邮箱 aminoyls@outlook.com 手机 +86 19520949063 教育背景 科罗拉多大学博尔德分校 2018.08 - 2022.05 计算机科学本科 工作经历 软件开发工程师｜科锐国际（华为 OD）｜深圳 2023.01 - 2025.04 主要工作内容 - 基于场景特征设计分类与决策策略，提升识别准确率，减少错误策略触发对系统稳定性的影响。 - 优化手势识别算法，在资源受限的嵌入式环境下提升识别效率和准确度。 - 为算法模块新特性和新功能进行方案设计、开发与维护。 - 跨部门协作完成版本交付、功能测试以及接口适配。 工作成果 - 负责核心计算模块优化，整体性能提升约 50% - 80%，显著降低系统延迟。 - 设计跨模块数据上报协议：定义数据结构及解析规则，支持任意长度扩展，提升系统可扩展性与跨团队对接效率。 - 在交付环节引入编译期校验机制（C++ 模板元编程），提前发现潜在结构体定义问题，提升系统可靠性。 - 独立推动需求拆解与落地，完成数据上报功能从方案设计到上线。 - 优化数据存储与内存占用，在保留完整数据前提下，空间占用减少约 50%。 技能 编程语言 - 熟悉 C、C++、Python - 熟悉 STL、模板与元编程 网络与并发 - 熟悉 Linux 环境下 socket 编程，具备 TCP/UDP 开发经验 - 熟悉多线程、协程、Linux 非阻塞 IO 与异步编程 - 熟悉 Redis 基本数据结构与常用 API 系统与工具 - 熟悉 Linux 操作系统及常用命令 - 熟练使用 Git、CMake、GDB、Valgrind - 能结合 core dump 与 gdb 排查内存越界、段错误等问题 - 能使用 Valgrind 进行内存泄漏检测与性能分析",
+    "segmented-op": "segmented operation head[tid] = 1 不是代表[0, tid] 里有flag，而是 比如 tid = 5 segmented operation cpp // Goal: inclusive segmented scan where flags[i] starts a new segment. // if flags[i] 1, reset the running sum at i global void segmented flag scan one block kernel(const float input, const uint32 t flags, float output, int n) { extern shared unsigned char shared[]; int tid = threadIdx.x; int i = blockDim.x blockIdx.x + tid; uint32 t head = reinterpret cast (shared); float prefix sum = reinterpret cast (head) + 1024; if (i = 0) { old = prefix sum[tid - z]; old head = head[tid - z]; } syncthreads(); if (tid - z = 0) { if (head[tid] 0) { prefix sum[tid] += old; } head[tid] = old head; } syncthreads(); } if (i 对于当前线程来说，一旦它已经合并了某个segment起点，下一轮就不会继续往更左边合并了。 注意，判断用的是head[tid]，而不是old head 因为对于当前块来说，能不能合并左边的块取决于自己当前是否含有segment起点，即flag[...]范围内都是0，因为函数要求flag[j]==1时，前缀和要重新计算，全0则为安全。 Hillis-Steele scan 的结构 text 每个位置维护“以自己为右端点的一段信息” 右边的线程会读取左边位置的信息 算法的并行性就在这里 串行写法 text 每个位置从左到右一个个累加 并行scan 每个位置同时向左合并越来越大的块 segment和scan的差异在于 text 如果我当前这段还没找到 segment 起点， 那我可以继续往左合并一块。 合并之后，如果左边那块里有 segment 起点， 我就记录下来：我现在已经找到起点了。 scan和reduce的线程活跃模式不一样 reduce 每一轮线程减半 text 第 1 轮：N 个元素参与，合成 N/2 个结果 第 2 轮：N/2 个结果参与，合成 N/4 个结果 第 3 轮：N/4 个结果参与，合成 N/8 个结果 ... 最后只剩 1 个结果 scan 大部分线程全程都在干活 text z = 1: tid = 1 - N - 1 个线程 z = 2: tid = 2 - N - 2 个线程 z = 4: tid = 4 - N - 4 个线程 z = 8: tid = 8 - N - 8 个线程 每一轮少掉前面z个线程，大部分线程一直活跃",
+    "segmented_op": "segmented operation 用 inclusive segmented scan 的 CUDA 示例理解 head flag 如何传播，以及为什么每个线程能在不跨段的情况下累计前缀和。 CUDA 并行算法 Scan segmented operation cpp // Goal: inclusive segmented scan where flags[i] starts a new segment. // if flags[i] 1, reset the running sum at i global void segmented flag scan one block kernel(const float input, const uint32 t flags, float output, int n) { extern shared unsigned char shared[]; int tid = threadIdx.x; int i = blockDim.x blockIdx.x + tid; uint32 t head = reinterpret cast (shared); float prefix sum = reinterpret cast (head) + 1024; if (i = 0) { old = prefix sum[tid - z]; old head = head[tid - z]; } syncthreads(); if (tid - z = 0) { if (head[tid] 0) { prefix sum[tid] += old; } head[tid] = old head; } syncthreads(); } if (i 对于当前线程来说，一旦它已经合并了某个segment起点，下一轮就不会继续往更左边合并了。 注意，判断用的是head[tid]，而不是old head 因为对于当前块来说，能不能合并左边的块取决于自己当前是否含有segment起点，即flag[...]范围内都是0，因为函数要求flag[j]==1时，前缀和要重新计算，全0则为安全。 Hillis-Steele scan 的结构 text 每个位置维护“以自己为右端点的一段信息” 右边的线程会读取左边位置的信息 算法的并行性就在这里 串行写法 text 每个位置从左到右一个个累加 并行scan 每个位置同时向左合并越来越大的块 segment和scan的差异在于 text 如果我当前这段还没找到 segment 起点， 那我可以继续往左合并一块。 合并之后，如果左边那块里有 segment 起点， 我就记录下来：我现在已经找到起点了。 scan和reduce的线程活跃模式不一样 reduce 每一轮线程减半 text 第 1 轮：N 个元素参与，合成 N/2 个结果 第 2 轮：N/2 个结果参与，合成 N/4 个结果 第 3 轮：N/4 个结果参与，合成 N/8 个结果 ... 最后只剩 1 个结果 scan 大部分线程全程都在干活 text z = 1: tid = 1 - N - 1 个线程 z = 2: tid = 2 - N - 2 个线程 z = 4: tid = 4 - N - 4 个线程 z = 8: tid = 8 - N - 8 个线程 每一轮少掉前面z个线程，大部分线程一直活跃",
+    "why_tree_reduction_and_scan_work": "为什么 reduce 和 scan 能刚好处理数组 从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。 并行算法 Reduction Scan 为什么像reduce， scan这样的并行算法可以工作？ 只要运算结果满足集合律，tree reduction / parallel scan 这类算法就都能成立。 cpp (a + b) + c == a + (b + c) 你可以随便添加括号，改变计算顺序，都不影响最终的结果 1.reduction为什么可以像树一样合并 原始的串行求和等价于 cpp ((((a0 + a1) + a2) + a3) + a4) + ... tree reduction改造完等价于 cpp (a0 + a1) + (a2 + a3) + (a4 + a5) + ... 再下一轮 cpp ((a0 + a1) + (a2 + a3)) + ((a4 + a5) + (a6 + a7)) 看起来结构变了，但是加法有结合律，所有这些形式只是改变了括号的组织形式 cpp a0 + a1 + a2 + a3 + a4 + ... tree reduction所做的事 每一轮把很多小区间的和合并成更大的区间和。 比如有8个元素 cpp 第 0 层： [a0] [a1] [a2] [a3] [a4] [a5] [a6] [a7] 第 1 层： [a0+a1] [a2+a3] [a4+a5] [a6+a7] 第 2 层： [a0+a1+a2+a3] [a4+a5+a6+a7] 第 3 层： [a0+a1+a2+a3+a4+a5+a6+a7] 它的循环不变量是 第k轮结束后，每个活跃区间保存的是长度为2^k的连续长度的区间和 为什么scan也有类似doubling的效果 cpp output[0] = a0 output[1] = a0 + a1 output[2] = a0 + a1 + a2 output[3] = a0 + a1 + a2 + a3 .... Hillis-Steele scan 的思路是： cpp offset = 1, 2, 4, 8, ... scratch[i] += scratch[i - offset] 它的循环不变量是 第k轮结束后，scratch[i]保存最长为2^{k+1}长度的连续区间和 为什么拆数组和构造数组都能成立 拆数组和构造数组本质是同一件事的两个方向 reduction 是从叶子往根走 小区间 - 大区间 - 更大区间 - 总和 例如： text [a0] [a1] [a2] [a3] \\ / \\ / [a0+a1] [a2+a3] \\ / [a0+a1+a2+a3] 它是在构造一棵合并树。 text scan 是让每个节点找到自己需要的左边区间 scratch[i] 一开始只知道 a[i] 然后知道左边 1 个 然后知道左边 2 个 然后知道左边 4 个 ... 例如 i = 7： text 初始： a7 offset = 1： a6 + a7 offset = 2： a4 + a5 + a6 + a7 offset = 4： a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7 它是在给每个位置构造自己的“前缀合并树”。 4. 最根本的证明：结合律 + 区间不变量 可以把这类算法的证明归结成两句话： 第一，所有中间值都表示某个连续区间的和。 第二，每一轮合并的两个区间都是相邻且不重叠的，所以合并后仍然是一个更大的连续区间。 比如： text [a0 a1 a2 a3] + [a4 a5 a6 a7] 合并后就是： text [a0 a1 a2 a3 a4 a5 a6 a7] 只要这个性质一直保持，最后结果一定正确。 5. 所以它不是“加法专属”，而是更一般的东西 只要运算满足结合律，都可以做类似的 reduction / scan。 可以用的： text sum: a + b product: a b min: min(a, b) max: max(a, b) and/or: a && b, a b xor: a ^ b --- 所以， 数学上保证任何N叉树操作都可以 ，工程实现一般用最方便的 二叉树 操作",
+    "writing-workflow": "给持续写作保留一点轻量流程 文章越容易落地，博客越容易持续更新。流程轻一点，内容反而更稳定，也更适合放进个人文章归档。 写作 流程 给持续写作保留一点轻量流程 很多博客做不下去，不是因为没有内容，而是因为每次发文的动作太重。 一个简单流程 1. 在 posts/ 下新增一个 Markdown 文件 2. 在文章开头的 frontmatter 中填写标题、日期、摘要和标签，再运行 node scripts/generate-posts.js 3. 刷新页面检查展示效果 4. 提交到 GitHub 仓库并发布 适合写什么 - 项目记录 - 技术方案复盘 - 工具使用经验 - 偶尔的非技术随笔 关于风格 我更倾向于把视觉重点放在这些位置： - 首页第一屏要有辨识度 - 列表与正文层级要明确 - 色彩要温和，但不能太“安全” 博客不一定要花哨，但至少应该让人看得出它经过了设计。"
+  },
+  "revision": "8c350bcf122a35d30047c8aad14611520696c4c13565d51db73590c3db972e02"
+}

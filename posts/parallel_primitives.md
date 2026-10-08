@@ -1,3 +1,13 @@
+---
+title: "cuda常用parallel primitives操作"
+date: "2026-06-14"
+summary: "整理 CUDA 中常见的 parallel primitives：reduce、scan、stencil、gather、scatter、sort、map、partition、compact 等操作。"
+tags: ["CUDA", "并行算法"]
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # cuda常用parallel primitives操作
 
 **reduce**

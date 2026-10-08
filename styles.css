@@ -1,3 +1,14 @@
+.editor-access {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.editor-access input { max-width: 160px; }
+.editor-access button { cursor: pointer; }
+
 :root {
   --white: #ffffff;
   --white-soft: rgba(255, 255, 255, 0.9);

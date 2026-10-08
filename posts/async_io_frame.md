@@ -8,6 +8,7 @@ stage: 架构主线已成型：Coroutine -> Operation -> Scheduler -> epoll/time
 stack: [C++20, coroutine, epoll, timerfd, eventfd]
 metrics: [async I/O runtime, timeout/cancel, event arbitration]
 repo: https://github.com/bielaiii/async_io_framework
+visual: "posts/projects/async_io_frame.json"
 ---
 
 # async_io_framework

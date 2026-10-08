@@ -1,3 +1,5 @@
+import { parseFrontmatter, splitMarkdownByMarker } from "../shared/post-model.mjs";
+
 export function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -8,32 +10,7 @@ export function escapeHtml(value) {
 }
 
 export function stripFrontmatter(markdown) {
-  return String(markdown || "").replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
-}
-
-function splitMarkdownByMarker(markdown, marker) {
-  const lines = String(markdown || "").split(/\r?\n/);
-  const chunks = [];
-  let current = [];
-  let inFence = false;
-  const markerPattern = new RegExp(`^\\s*<!--\\s*${marker}\\s*-->\\s*$`, "i");
-
-  lines.forEach((line) => {
-    if (/^\s*(```|~~~)/.test(line)) {
-      inFence = !inFence;
-    }
-
-    if (!inFence && markerPattern.test(line)) {
-      chunks.push(current.join("\n"));
-      current = [];
-      return;
-    }
-
-    current.push(line);
-  });
-
-  chunks.push(current.join("\n"));
-  return chunks;
+  return parseFrontmatter(markdown).body;
 }
 
 export function renderLatex(root) {
@@ -79,7 +56,7 @@ export function parseMarkdownWithMath(markdown) {
 
   return mathSegments.reduce(
     (html, { token, source }) => html.split(token).join(escapeHtml(source)),
-    marked.parse(protectedMarkdown)
+    marked.parse(protectedMarkdown, { breaks: true, gfm: true })
   );
 }
 

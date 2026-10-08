@@ -2,86 +2,97 @@
   "Hillis-Steele_scan": {
     "file": "posts/Hillis-Steele_scan.md",
     "createdAt": "2026-06-12T19:06:31+08:00",
-    "updatedAt": "2026-06-12T19:06:31+08:00"
+    "updatedAt": "2026-06-12T19:06:31+08:00",
+    "version": "10e4a8cd09dfbc28eb142511989a752017c0814ef803b2b692ff70d2abca12cd"
   },
   "any-block-reduce": {
     "file": "posts/any-block-reduce.md",
     "createdAt": "2026-06-24T18:00:02+08:00",
-    "updatedAt": "2026-07-23T21:27:00+08:00"
+    "updatedAt": "2026-07-23T21:27:00+08:00",
+    "version": "e2bec34c46b3587a479cd7aded161973e5c1b4ba6859f96c2c30b5ada4e89dcb"
   },
   "async_io_frame": {
     "file": "posts/async_io_frame.md",
     "createdAt": "2026-06-16T18:04:23+08:00",
-    "updatedAt": "2026-06-16T18:04:23+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00",
+    "version": "fb40694877c2ddff4ee544bb502b7942e8141462553534cee297b245feed9f5d"
   },
   "blelloch-scan": {
     "file": "posts/blelloch-scan.md",
     "createdAt": "2026-06-24T18:00:02+08:00",
-    "updatedAt": "2026-07-23T21:27:00+08:00"
+    "updatedAt": "2026-07-23T21:27:00+08:00",
+    "version": "d22e752d919f1b4df51c935d093792ad8fe21893c699d9639475bedcde3e7a31"
   },
   "code-snippet-demo": {
     "file": "posts/code-snippet-demo.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
-    "updatedAt": "2026-06-12T19:06:31+08:00"
+    "updatedAt": "2026-06-12T19:06:31+08:00",
+    "version": "07f217d6ba488ed0ba551b27fc99d0979c5fc264bc4bd0fa628f8861d8db5a66"
   },
   "first-post": {
     "file": "posts/first-post.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
-    "updatedAt": "2026-05-14T01:45:07+08:00"
+    "updatedAt": "2026-05-14T01:45:07+08:00",
+    "version": "d3bbb6027baaf2c9891965ab701f517cd8fd8091f2bd116473e8c0beeea25626"
   },
   "gdb_cli_tools": {
     "file": "posts/gdb_cli_tools.md",
     "createdAt": "2026-06-16T18:04:23+08:00",
-    "updatedAt": "2026-06-16T18:04:23+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00",
+    "version": "74e3fa7bb161e751bb4906379158a78b0b89ca8f3eff3e63801556b365ffc6ce"
   },
   "layout-features-demo": {
     "file": "posts/layout-features-demo.md",
     "createdAt": "2026-06-14T03:32:08+08:00",
-    "updatedAt": "2026-06-16T18:04:23+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00",
+    "version": "2038fb9dfc66fc0682e0c2b6dd6fd25df42c00df43583b9bff733a1c19abc899"
   },
   "layout_features_demo": {
     "file": "posts/layout_features_demo.md",
     "createdAt": "2026-06-14T03:32:08+08:00",
-    "updatedAt": "2026-06-16T18:04:23+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00",
+    "version": "b394de5c06f87c6daf39a72416b45044270d05bed94ee8e20fb8c5c164994c05"
   },
   "parallel_primitives": {
     "file": "posts/parallel_primitives.md",
     "createdAt": "2026-06-12T19:06:31+08:00",
-    "updatedAt": "2026-06-12T19:44:32+08:00"
+    "updatedAt": "2026-06-12T19:44:32+08:00",
+    "version": "6805292c05594cff76c6cbcf6d422c1c1ca99f7206bdafcf808b76b701a6c1eb"
   },
   "project-blueprint": {
     "file": "posts/project-blueprint.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
-    "updatedAt": "2026-03-28T17:14:43+08:00"
+    "updatedAt": "2026-03-28T17:14:43+08:00",
+    "version": "62d001e160d289cccb96e3cd36b5daf5a5301c0d083f87f52fdee23ea81e5048"
   },
   "resume-profile": {
     "file": "posts/resume-profile.md",
     "createdAt": "2026-03-29T15:55:53+08:00",
-    "updatedAt": "2026-03-29T17:08:18+08:00"
+    "updatedAt": "2026-03-29T17:08:18+08:00",
+    "version": "6670366241e3853113a0736429078d989ab4569e9616834b400c57f0c17d507e"
   },
   "segmented-op": {
     "file": "posts/segmented-op.md",
     "createdAt": "2026-06-12T19:06:31+08:00",
-    "updatedAt": "2026-06-16T18:04:23+08:00"
+    "updatedAt": "2026-06-16T18:04:23+08:00",
+    "version": "c912728b81c1d6b9966843f2162ebcb857512ae05d0aa99c40d3f0a10d14458a"
   },
   "segmented_op": {
     "file": "posts/segmented_op.md",
     "createdAt": "2026-06-12T19:06:31+08:00",
-    "updatedAt": "2026-06-12T19:44:32+08:00"
+    "updatedAt": "2026-06-12T19:44:32+08:00",
+    "version": "1c784a2db6ab9f88e37c14ae04132d9c954a51b6699071e4c03edd8f98ef5166"
   },
   "why_tree_reduction_and_scan_work": {
     "file": "posts/why_tree_reduction_and_scan_work.md",
     "createdAt": "2026-06-12T19:06:31+08:00",
-    "updatedAt": "2026-06-12T19:06:31+08:00"
+    "updatedAt": "2026-06-12T19:06:31+08:00",
+    "version": "bb9d380b9f7883de8ba5feb3cb446a81c4a24bff93bfec25356dedc9d691f6cf"
   },
   "writing-workflow": {
     "file": "posts/writing-workflow.md",
     "createdAt": "2026-03-28T17:14:43+08:00",
-    "updatedAt": "2026-05-14T01:45:07+08:00"
-  },
-  "计算最接近的2次幂": {
-    "file": "posts/计算最接近的2次幂.md",
-    "createdAt": "2026-07-23T21:27:00+08:00",
-    "updatedAt": "2026-07-23T21:27:00+08:00"
+    "updatedAt": "2026-05-14T01:45:07+08:00",
+    "version": "7cdcd53e37875d9b309e47deb4c2fa57cbb346508774bfbcbc9edc346c03090d"
   }
 }

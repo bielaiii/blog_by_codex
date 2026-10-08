@@ -1,0 +1,150 @@
+{
+  "eyebrow": "C++ coroutine async I/O runtime",
+  "repoLabel": "GitHub",
+  "sections": {
+    "architecture": "Coroutine、operation 与内核事件的分层",
+    "capabilities": "框架当前承接的异步能力",
+    "flow": "一次 async operation 的生命周期",
+    "boundaries": "运行时设计边界"
+  },
+  "architecture": [
+    {
+      "title": "Coroutine API",
+      "nodes": [
+        {
+          "title": "User Coroutine",
+          "detail": "以 co_await 组织异步读写流程"
+        },
+        {
+          "title": "async_* Awaiter",
+          "detail": "connect / accept / read / write / timer"
+        }
+      ]
+    },
+    {
+      "title": "Runtime Core",
+      "nodes": [
+        {
+          "title": "Operation State",
+          "detail": "仲裁 ready、timeout、cancel 的完成权"
+        },
+        {
+          "title": "Scheduler",
+          "detail": "维护 fd 到 pending operation 的映射"
+        },
+        {
+          "title": "Buffer View",
+          "detail": "管理读写偏移和剩余容量"
+        }
+      ]
+    },
+    {
+      "title": "Kernel Events",
+      "nodes": [
+        {
+          "title": "epoll",
+          "detail": "分发 socket readiness"
+        },
+        {
+          "title": "timerfd",
+          "detail": "驱动 wait_for 和 timeout"
+        },
+        {
+          "title": "eventfd",
+          "detail": "主动唤醒取消路径"
+        }
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "title": "Socket I/O",
+      "items": [
+        "async_connect",
+        "async_accept",
+        "async_read",
+        "async_write",
+        "async_read_some"
+      ]
+    },
+    {
+      "title": "Timer",
+      "items": [
+        "wait_for",
+        "read timeout",
+        "write timeout",
+        "timer queue"
+      ]
+    },
+    {
+      "title": "Cancellation",
+      "items": [
+        "cancel_token",
+        "eventfd wakeup",
+        "operation_state arbitration"
+      ]
+    },
+    {
+      "title": "Scheduling",
+      "items": [
+        "fd readiness",
+        "read slot",
+        "write slot",
+        "epoll dispatch"
+      ]
+    },
+    {
+      "title": "Buffer",
+      "items": [
+        "StaticBuffer",
+        "DynamicBuffer",
+        "Buffer_View",
+        "offset tracking"
+      ]
+    }
+  ],
+  "flow": [
+    {
+      "title": "Await",
+      "detail": "coroutine 提交 async operation"
+    },
+    {
+      "title": "Register",
+      "detail": "Scheduler 注册 fd / timer / cancel interest"
+    },
+    {
+      "title": "Suspend",
+      "detail": "operation 挂起 coroutine"
+    },
+    {
+      "title": "Wake",
+      "detail": "epoll_wait 返回 socket、timer 或 cancel 事件"
+    },
+    {
+      "title": "Arbitrate",
+      "detail": "operation_state 决定完成结果"
+    },
+    {
+      "title": "Resume",
+      "detail": "coroutine 恢复并清理注册项"
+    }
+  ],
+  "boundaries": [
+    {
+      "title": "Thin Runtime",
+      "detail": "只包装 readiness，不隐藏底层事件模型"
+    },
+    {
+      "title": "Single Waiter",
+      "detail": "同一 socket fd 保持单读槽、单写槽"
+    },
+    {
+      "title": "Active Cancel",
+      "detail": "取消会唤醒 epoll，而不是等待下一次 socket ready"
+    },
+    {
+      "title": "Timer Dispatch",
+      "detail": "timerfd 当前按调度器事件推进，不是批量 dispatcher 模型"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ stage: 架构主线已成型：Vibe Coding Loop -> Session -> Action -> Evidence
 stack: [C++20, GDB/MI, daemon, JSONL, Markdown]
 metrics: [vibe-coding, evidence flow, session runtime]
 repo: https://github.com/bielaiii/gdb_cli_tools
+visual: "posts/projects/gdb_cli_tools.json"
 ---
 
 # gdb-agent

@@ -1,3 +1,13 @@
+---
+title: "为什么 reduce 和 scan 能刚好处理数组"
+date: "2026-06-12"
+summary: "从结合律、区间合并和循环不变量出发，解释 tree reduction 与 parallel scan 为什么能改变计算顺序但保持结果正确。"
+tags: ["并行算法", "Reduction", "Scan"]
+tab: "articles"
+layout: "single"
+draft: false
+---
+
 # 为什么像reduce， scan这样的并行算法可以工作？
 
 > 只要运算结果满足集合律，tree reduction / parallel scan 这类算法就都能成立。

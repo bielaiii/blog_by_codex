@@ -1,3 +1,13 @@
+---
+title: "个人简历"
+date: "2026-03-29"
+summary: ""
+tags: []
+tab: "resume"
+layout: "single"
+draft: false
+---
+
 # 个人简历
 
 ## 基本信息
