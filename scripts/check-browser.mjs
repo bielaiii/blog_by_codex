@@ -112,8 +112,48 @@ try {
   if (process.env.BROWSER_EDITOR_TOKEN) {
     await waitFor("!!document.querySelector('.editor-access')", 'locked editor');
     assert.equal(await evaluate("!!document.querySelector('.local-editor-create')"), false);
+    assert.equal(await evaluate("document.querySelector('.editor-access-dialog').open"), false);
+    assert.equal(await evaluate("document.querySelector('.editor-access input').getClientRects().length"), 0);
+    await evaluate("document.querySelector('.editor-access-trigger').click()");
+    assert.equal(await evaluate("document.activeElement.id"), 'editor-access-token');
+    await evaluate("(() => { const form=document.querySelector('.editor-access'); form.querySelector('input').value='incorrect-token'; form.requestSubmit(); })()");
+    await waitFor("document.querySelector('#editor-access-status').textContent.includes('口令错误') && !document.querySelector('.editor-access-submit').disabled", 'incorrect token feedback');
+    assert.equal(await evaluate("document.querySelector('.editor-access-dialog').open"), true);
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await waitFor("!document.querySelector('.editor-access-dialog').open && document.activeElement.matches('.editor-access-trigger')", 'escape and focus restoration');
+    assert.equal(await evaluate("document.querySelector('.editor-access input').value"), '');
+    const accessTheme = await evaluate('document.documentElement.dataset.theme');
+    for (const width of [1280, 390]) {
+      await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 680 });
+      await evaluate("document.body.classList.add('is-topbar-collapsed')");
+      await evaluate("new Promise(resolve => setTimeout(resolve, 600))");
+      assert.equal(await evaluate("(() => { const entry=document.querySelector('.editor-access-trigger').getBoundingClientRect(); const theme=document.querySelector('#theme-toggle').getBoundingClientRect(); const tabs=document.querySelector('.tabs').getBoundingClientRect(); return tabs.right <= entry.left && entry.right <= theme.left; })()"), true, 'collapsed navigation overlaps editor controls');
+      await evaluate("document.body.classList.remove('is-topbar-collapsed')");
+      for (const theme of ['light', 'dark']) {
+        await evaluate(`document.documentElement.dataset.theme = ${JSON.stringify(theme)}`);
+        await evaluate("new Promise(resolve => setTimeout(resolve, 600))");
+        if (process.env.BROWSER_ACCESS_SCREENSHOTS && theme === 'light') {
+          const { data } = await send('Page.captureScreenshot', { format: 'png' });
+          fs.writeFileSync(`${process.env.BROWSER_ACCESS_SCREENSHOTS}-${width}-closed.png`, Buffer.from(data, 'base64'));
+        }
+        await evaluate("document.querySelector('.editor-access-trigger').click()");
+        assert.equal(await evaluate("(() => { const r=document.querySelector('.editor-access-dialog').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight && document.documentElement.scrollWidth <= document.documentElement.clientWidth; })()"), true, 'access dialog must fit viewport without widening page');
+        await waitFor("getComputedStyle(document.querySelector('.editor-access-dialog')).color === getComputedStyle(document.body).color", 'access dialog follows settled theme');
+        if (process.env.BROWSER_ACCESS_SCREENSHOTS) {
+          const { data } = await send('Page.captureScreenshot', { format: 'png' });
+          fs.writeFileSync(`${process.env.BROWSER_ACCESS_SCREENSHOTS}-${width}-${theme}.png`, Buffer.from(data, 'base64'));
+        }
+        await evaluate("document.querySelector('.editor-access-close').click()");
+        await waitFor("!document.querySelector('.editor-access-dialog').open", 'close access dialog');
+      }
+    }
+    await send('Emulation.clearDeviceMetricsOverride');
+    await evaluate(`document.documentElement.dataset.theme = ${JSON.stringify(accessTheme)}`);
+    await evaluate("document.querySelector('.editor-access-trigger').click()");
     await evaluate(`(() => { const form = document.querySelector('.editor-access'); form.querySelector('input').value = ${JSON.stringify(process.env.BROWSER_EDITOR_TOKEN)}; form.requestSubmit(); })()`);
     await waitFor("!document.querySelector('.editor-access')", 'editor unlock');
+    assert.equal(await evaluate("!!document.querySelector('.editor-access-trigger')"), false);
   }
   const initialTheme = await evaluate('document.documentElement.dataset.theme');
   await evaluate("document.querySelector('#theme-toggle').click()");

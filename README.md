@@ -461,7 +461,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-lan-
 
 Mac 直接打开 `http://192.168.0.102:8000/`，无需 SSH 隧道。Windows 本机仍用 `http://127.0.0.1:8000/`。两者都是同一个博客，支持草稿预览、创建、保存和删除文章。Windows 的 IP 变化时使用新地址。
 
-此配置将 HTTP 端口绑定到 `0.0.0.0`，允许局域网阅读；防火墙只允许私人网络的本地子网。写入接口默认锁定，浏览器需在顶部输入编辑口令并点击“解锁编辑”。口令由服务启动时生成，保存在被 Git 忽略的 `.local/editor-token`；可在 Windows 项目目录运行 `Get-Content .local\editor-token` 查看，也可通过 `BLOG_EDITOR_TOKEN` 环境变量指定至少 24 个字符的口令。服务器使用 HttpOnly 会话 Cookie，12 小时后或重启后需要重新解锁。只读访问不会显示或提供草稿。服务器不提供 `.git`、`.local`、`scripts/` 等私有文件，并拒绝跨站写入请求。配置保存在 `.local/lan.json`，Windows 与 WSL 的部署及登录启动均读取它。镜像仍只使用本地镜像。
+此配置将 HTTP 端口绑定到 `0.0.0.0`，允许局域网阅读；防火墙只允许私人网络的本地子网。写入接口默认锁定，浏览器需点击顶部主题按钮旁的编辑图标，在弹出面板中输入编辑口令并点击“开始编辑”。口令由服务启动时生成，保存在被 Git 忽略的 `.local/editor-token`；可在 Windows 项目目录运行 `Get-Content .local\editor-token` 查看，也可通过 `BLOG_EDITOR_TOKEN` 环境变量指定至少 24 个字符的口令。服务器使用 HttpOnly 会话 Cookie，12 小时后或重启后需要重新解锁。只读访问不会显示或提供草稿。服务器不提供 `.git`、`.local`、`scripts/` 等私有文件，并拒绝跨站写入请求。配置保存在 `.local/lan.json`，Windows 与 WSL 的部署及登录启动均读取它。镜像仍只使用本地镜像。
 
 直接运行 Node 服务并从本机回环地址访问时可以编辑；Docker 的端口转发可能需要同样输入口令。设置 `BLOG_EDITOR_ENABLED=false` 可关闭所有编辑接口（包括本机访问），Compose 支持此环境变量。
 
