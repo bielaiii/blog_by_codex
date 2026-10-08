@@ -23,8 +23,7 @@ try {
   await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
   const port = probe.address().port;
   await new Promise(resolve => probe.close(resolve));
-  const token = 'browser-suite-test-token-1234567890';
-  preview = spawn(process.execPath, ['preview-server.js'], { cwd: root, env: { ...process.env, HOST: '0.0.0.0', PORT: String(port), BLOG_LAN_EDITOR: 'true', BLOG_EDITOR_ENABLED: 'true', BLOG_EDITOR_TOKEN: token }, stdio: ['ignore', 'pipe', 'pipe'] });
+  preview = spawn(process.execPath, ['preview-server.js'], { cwd: root, env: { ...process.env, HOST: '0.0.0.0', PORT: String(port), BLOG_EDITOR_ENABLED: 'true' }, stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve, reject) => {
     let output = '';
     const timer = setTimeout(() => reject(new Error(`Preview startup timed out: ${output}`)), 10000);
@@ -34,7 +33,7 @@ try {
     preview.on('exit', code => { clearTimeout(timer); reject(new Error(`Preview exited ${code}: ${output}`)); });
   });
   await run(['scripts/check-browser.mjs', `http://127.0.0.1:${port}/`]);
-  await run(['scripts/check-browser.mjs', `http://127.0.0.2:${port}/`], { BROWSER_EDITOR_TOKEN: token });
+  await run(['scripts/check-browser.mjs', `http://127.0.0.2:${port}/`]);
   const site = path.join(temporary, 'site');
   await buildSite(root, site);
   const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };

@@ -19,14 +19,12 @@ $composeArgs = @('compose', '--project-directory', $projectDir, '-f', (Join-Path
 $previousSource = $env:BLOG_PROJECT_DIR
 $previousPort = $env:BLOG_PORT
 $previousHttpBind = $env:BLOG_HTTP_BIND
-$previousLanEditor = $env:BLOG_LAN_EDITOR
 $previousSshBind = $env:BLOG_SSH_BIND
 $previousSshPort = $env:BLOG_SSH_PORT
 try {
     $env:BLOG_PROJECT_DIR = $projectDir
     $env:BLOG_PORT = [string]$Port
     $env:BLOG_HTTP_BIND = '127.0.0.1'
-    $env:BLOG_LAN_EDITOR = 'false'
     $lanPath = Join-Path $projectDir '.local\lan.json'
     if (Test-Path -LiteralPath $lanPath) {
         $lan = Get-Content -LiteralPath $lanPath -Raw | ConvertFrom-Json
@@ -36,7 +34,6 @@ try {
                 throw 'LAN access requires an IPv4 bind address.'
             }
             $env:BLOG_HTTP_BIND = $lan.bindAddress
-            $env:BLOG_LAN_EDITOR = 'true'
         }
     }
     $remotePath = Join-Path $projectDir '.local\remote.json'
@@ -69,7 +66,6 @@ try {
     $env:BLOG_PROJECT_DIR = $previousSource
     $env:BLOG_PORT = $previousPort
     $env:BLOG_HTTP_BIND = $previousHttpBind
-    $env:BLOG_LAN_EDITOR = $previousLanEditor
     $env:BLOG_SSH_BIND = $previousSshBind
     $env:BLOG_SSH_PORT = $previousSshPort
 }

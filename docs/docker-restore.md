@@ -103,10 +103,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\switch-local.p
 Linux/macOS 可用 Compose 环境变量开放局域网 HTTP：
 
 ```sh
-BLOG_HTTP_BIND=0.0.0.0 BLOG_LAN_EDITOR=true docker compose up -d --no-build --pull never --wait
+BLOG_HTTP_BIND=0.0.0.0 docker compose up -d --no-build --pull never --wait
 ```
 
-要让配置在后续 Compose 调用时保持一致，将 `BLOG_HTTP_BIND=0.0.0.0` 与 `BLOG_LAN_EDITOR=true` 写进未提交的 `.env`。防火墙与登录启动使用该操作系统自己的设置；容器已经设置 `restart: unless-stopped`，Docker 引擎启动后会恢复运行。
+要让配置在后续 Compose 调用时保持一致，将 `BLOG_HTTP_BIND=0.0.0.0` 写进未提交的 `.env`。防火墙与登录启动使用该操作系统自己的设置；容器已经设置 `restart: unless-stopped`，Docker 引擎启动后会恢复运行。
 
 Linux/macOS 还可创建 `.local/authorized_keys`，写入 SSH 公钥，再通过 `BLOG_SSH_BIND=0.0.0.0 docker compose -f compose.yaml -f compose.remote.yaml up -d --no-build --pull never --wait` 启动 SSH。首次启用会生成新的服务器主机密钥，Mac 应按新服务器指纹确认连接。
 

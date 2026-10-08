@@ -170,8 +170,7 @@ body.is-reading-mode.is-topbar-collapsed .topbar {
 }
 
 .home-button,
-.theme-toggle,
-.editor-access-trigger {
+.theme-toggle {
   position: absolute;
   top: 16px;
   display: grid;
@@ -189,8 +188,7 @@ body.is-reading-mode.is-topbar-collapsed .topbar {
 }
 
 body.is-reading-mode .home-button,
-body.is-reading-mode .theme-toggle,
-body.is-reading-mode .editor-access-trigger {
+body.is-reading-mode .theme-toggle {
   position: fixed;
   top: 18px;
   pointer-events: auto;
@@ -217,25 +215,15 @@ body.is-reading-mode .theme-toggle {
   right: max(18px, calc((100vw - var(--max-width)) / 2 + 18px));
 }
 
-.editor-access-trigger {
-  right: 70px;
-}
-
-body.is-reading-mode .editor-access-trigger {
-  right: max(70px, calc((100vw - var(--max-width)) / 2 + 70px));
-}
-
 .home-button:hover,
-.theme-toggle:hover,
-.editor-access-trigger:hover {
+.theme-toggle:hover {
   transform: translateY(-1px);
   background: rgba(13, 107, 255, 0.16);
   box-shadow: 0 0 0 1px rgba(13, 107, 255, 0.18), 0 16px 30px rgba(13, 107, 255, 0.16);
 }
 
 .home-button:focus-visible,
-.theme-toggle:focus-visible,
-.editor-access-trigger:focus-visible {
+.theme-toggle:focus-visible {
   outline: 2px solid rgba(13, 107, 255, 0.36);
   outline-offset: 3px;
 }
@@ -277,8 +265,7 @@ html[data-theme="dark"] .theme-toggle-icon-sun {
 }
 
 body.is-topbar-collapsed .home-button,
-body.is-topbar-collapsed .theme-toggle,
-body.is-topbar-collapsed .editor-access-trigger {
+body.is-topbar-collapsed .theme-toggle {
   top: 50%;
   transform: translateY(-50%);
 }
@@ -292,145 +279,19 @@ body.is-topbar-collapsed .theme-toggle {
 }
 
 body.is-topbar-collapsed .home-button:hover,
-body.is-topbar-collapsed .theme-toggle:hover,
-body.is-topbar-collapsed .editor-access-trigger:hover {
+body.is-topbar-collapsed .theme-toggle:hover {
   transform: translateY(calc(-50% - 1px));
 }
 
 body.is-reading-mode.is-topbar-collapsed .home-button,
-body.is-reading-mode.is-topbar-collapsed .theme-toggle,
-body.is-reading-mode.is-topbar-collapsed .editor-access-trigger {
+body.is-reading-mode.is-topbar-collapsed .theme-toggle {
   top: 18px;
   transform: translateY(0);
 }
 
 body.is-reading-mode .home-button:hover,
-body.is-reading-mode .theme-toggle:hover,
-body.is-reading-mode .editor-access-trigger:hover {
+body.is-reading-mode .theme-toggle:hover {
   transform: translateY(-1px);
-}
-
-.editor-access-trigger svg,
-.editor-access-close svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-body.has-editor-access.is-topbar-collapsed .tabs {
-  width: min(760px, calc(100% - 176px));
-}
-
-.editor-access-dialog {
-  width: min(420px, calc(100% - 32px));
-  max-height: calc(100dvh - 32px);
-  padding: 32px;
-  overflow: auto;
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  color: var(--text);
-  background: var(--white);
-  box-shadow: var(--white-glow), var(--shadow);
-}
-
-.editor-access-dialog::backdrop {
-  background: rgba(8, 17, 31, 0.36);
-  backdrop-filter: blur(8px);
-}
-
-.editor-access-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.editor-access-close:hover {
-  background: var(--code-bg);
-  color: var(--text);
-}
-
-.editor-access h2 {
-  margin: 0;
-  font-family: "Noto Serif SC", serif;
-  font-size: 1.6rem;
-}
-
-#editor-access-description {
-  margin: 12px 0 28px;
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.7;
-}
-
-.editor-access label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.editor-access input {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--control-bg);
-  color: var(--text);
-  font: inherit;
-  font-size: 16px;
-}
-
-.editor-access input::placeholder {
-  color: var(--muted);
-}
-
-.editor-access input:focus-visible,
-.editor-access button:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 3px;
-}
-
-#editor-access-status {
-  min-height: 1.5em;
-  margin: 10px 0 14px;
-  color: var(--muted);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.editor-access-submit {
-  width: 100%;
-  padding: 13px 18px;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--active-tab-start), var(--active-tab-end));
-  color: var(--active-tab-text);
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 160ms ease, opacity 160ms ease;
-}
-
-.editor-access-submit:hover {
-  transform: translateY(-1px);
-}
-
-.editor-access-submit:disabled {
-  opacity: 0.65;
-  cursor: wait;
 }
 
 .brand-eyebrow {
@@ -3204,8 +3065,7 @@ body.is-resizing-editor {
   }
 
   .home-button,
-  .theme-toggle,
-  .editor-access-trigger {
+  .theme-toggle {
     top: 14px;
     width: 38px;
     height: 38px;
@@ -3217,19 +3077,6 @@ body.is-resizing-editor {
 
   .theme-toggle {
     right: 14px;
-  }
-
-  .editor-access-trigger {
-    right: 62px;
-  }
-
-  body.is-reading-mode .editor-access-trigger {
-    right: 62px;
-  }
-
-  .editor-access-dialog {
-    padding: 28px 24px;
-    border-radius: 22px;
   }
 
   .home-button-icon,

@@ -2,17 +2,12 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const net = require('node:net');
-const crypto = require('node:crypto');
 const { formatMarkdown } = require('./server/format.cjs');
 const listSnippets = require('./server/snippets.cjs');
 const root = __dirname;
 const port = Number(process.env.PORT) || 8000;
 const host = process.env.HOST || '127.0.0.1';
 const editorEnabled = process.env.BLOG_EDITOR_ENABLED !== 'false';
-const lanEditor = process.env.BLOG_LAN_EDITOR === 'true';
-const sessions = new Map();
-const sessionAge = 12 * 60 * 60 * 1000;
-let editorToken;
 const mime = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -25,34 +20,8 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 function failure(status, message) { return Object.assign(new Error(message), { status }); }
-function peerIsLoopback(req) {
-  return ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress);
-}
-function sessionIsValid(req) {
-  const cookie = String(req.headers.cookie || '').split(';').map(part => part.trim()).find(part => part.startsWith('blog-editor-session='));
-  const key = cookie?.slice('blog-editor-session='.length);
-  const expiration = sessions.get(key);
-  if (expiration && expiration > Date.now()) return true;
-  if (key) sessions.delete(key);
-  return false;
-}
-function canEdit(req) {
-  if (!editorEnabled) return false;
-  const hostname = new URL(`http://${req.headers.host}`).hostname;
-  const local = peerIsLoopback(req) && ['127.0.0.1', '[::1]', 'localhost'].includes(hostname);
-  return local || (canUnlock(req) && sessionIsValid(req));
-}
-function canUnlock(req) {
-  const hostname = new URL(`http://${req.headers.host}`).hostname;
-  // Docker's published loopback port can arrive from its bridge address.
-  // That path still requires the secret; Host alone never authorizes a write.
-  return editorEnabled && (lanEditor || ['127.0.0.1', '[::1]', 'localhost'].includes(hostname));
-}
-function issueSession(res) {
-  for (const [key, expiration] of sessions) if (expiration <= Date.now()) sessions.delete(key);
-  const key = crypto.randomBytes(32).toString('hex');
-  sessions.set(key, Date.now() + sessionAge);
-  res.setHeader('Set-Cookie', `blog-editor-session=${key}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${sessionAge / 1000}`);
+function canEdit() {
+  return editorEnabled;
 }
 async function readBody(req) {
   if (!String(req.headers['content-type'] || '').startsWith('application/json')) throw failure(415, 'Use application/json');
@@ -76,14 +45,6 @@ async function readBody(req) {
   const { parseFrontmatter, isPostVisible } = await import('./shared/post-model.mjs');
   const service = createPostService(root);
   await generateCatalog(root, { includeDrafts: true });
-  if (editorEnabled) {
-    const tokenPath = path.join(root, '.local/editor-token');
-    fs.mkdirSync(path.dirname(tokenPath), { recursive: true });
-    editorToken = process.env.BLOG_EDITOR_TOKEN || (fs.existsSync(tokenPath) ? fs.readFileSync(tokenPath, 'utf8').trim() : crypto.randomBytes(32).toString('hex'));
-    if (editorToken.length < 24) throw new Error('BLOG_EDITOR_TOKEN must contain at least 24 characters');
-    if (!process.env.BLOG_EDITOR_TOKEN) { fs.writeFileSync(tokenPath, `${editorToken}\n`, { mode: 0o600 }); fs.chmodSync(tokenPath, 0o600); }
-    if (lanEditor) console.log('LAN reading enabled. Unlock editing with BLOG_EDITOR_TOKEN or the token in .local/editor-token.');
-  }
   const server = http.createServer(async (req, res) => {
     try {
       let url;
@@ -96,18 +57,10 @@ async function readBody(req) {
       const api = route.startsWith('/api/');
       if (api && (req.headers['sec-fetch-site'] === 'cross-site' || (req.headers.origin && req.headers.origin !== url.origin))) throw failure(403, 'Cross-origin editing is not allowed');
       if (req.method === 'GET' && route === '/api/preview-config') {
-        sendJson(res, 200, { localEditor: canEdit(req), canUnlock: canUnlock(req) }); return;
-      }
-      if (req.method === 'POST' && route === '/api/editor-session') {
-        if (!canUnlock(req)) throw failure(403, 'Remote editing is disabled');
-        const { token } = await readBody(req);
-        const actual = crypto.createHash('sha256').update(String(token || '')).digest();
-        const expected = crypto.createHash('sha256').update(editorToken).digest();
-        if (!crypto.timingSafeEqual(actual, expected)) throw failure(403, '编辑口令错误');
-        issueSession(res); sendJson(res, 200, { ok: true }); return;
+        sendJson(res, 200, { localEditor: canEdit() }); return;
       }
       if (api) {
-        if (!canEdit(req)) throw failure(403, 'Editing is locked or disabled');
+        if (!canEdit()) throw failure(403, 'Editing is disabled');
         if (req.method === 'GET' && route === '/api/snippets') { sendJson(res, 200, listSnippets(path.join(root, 'snippets'))); return; }
         if (req.method === 'GET' && route === '/api/post') { sendJson(res, 200, { ok: true, ...await service.read(url.searchParams.get('slug')) }); return; }
         if (req.method === 'POST') {
@@ -124,7 +77,7 @@ async function readBody(req) {
       if (!['GET', 'HEAD'].includes(req.method)) throw failure(405, 'Method not allowed');
       if (['/data/catalog.json', '/data/posts.json', '/data/post-metadata.json'].includes(route)) {
         const catalog = readJson(path.join(root, 'data/catalog.json'));
-        if (!canEdit(req)) {
+        if (!canEdit()) {
           const config = readJson(path.join(root, 'data/site-config.json'));
           catalog.posts = catalog.posts.filter(post => isPostVisible(post, { publishDrafts: config.publishDrafts === true }));
           for (const key of ['postMetadata', 'searchText']) catalog[key] = Object.fromEntries(catalog.posts.map(post => [post.slug, catalog[key][post.slug]]));
@@ -137,7 +90,7 @@ async function readBody(req) {
       if (!['index.html', 'app.js', 'styles.css'].includes(relative) && !/^(modules|shared|vendor|assets|posts|data)\//.test(relative)) throw failure(403, 'Private project files are not served');
       let file;
       try { file = safeFile(root, relative); } catch { throw failure(403, 'Forbidden path'); }
-      if (relative.startsWith('posts/') && relative.endsWith('.md') && !canEdit(req)) {
+      if (relative.startsWith('posts/') && relative.endsWith('.md') && !canEdit()) {
         const metadata = parseFrontmatter(fs.readFileSync(file, 'utf8')).metadata;
         const config = readJson(path.join(root, 'data/site-config.json'));
         if (!isPostVisible(metadata, { publishDrafts: config.publishDrafts === true })) throw failure(404, 'Post not found');

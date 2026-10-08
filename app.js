@@ -9,7 +9,6 @@ import { createRouter } from "./modules/router.js";
 import { createArchiveView } from "./modules/archive-view.js";
 import { createWelcomeView } from "./modules/welcome-view.js";
 import { createTocView } from "./modules/toc-view.js";
-import { setupEditorAccess } from "./modules/editor-access.js";
 
 const state = createAppState(tabs);
 const readingScope = createRenderScope();
@@ -26,8 +25,7 @@ async function hasPreviewEditor() {
     clearTimeout(timeout);
   }
 }
-let previewCapabilities = await hasPreviewEditor();
-let isLocalPreview = previewCapabilities.localEditor === true;
+const isLocalPreview = (await hasPreviewEditor()).localEditor === true;
 
 
 let posts = [];
@@ -992,12 +990,6 @@ window.addEventListener("wheel", handleTopEdgeScroll, { passive: true });
 async function bootstrap() {
   initializeTheme();
   await initializeSiteConfig();
-  setupEditorAccess(previewCapabilities, async () => {
-    previewCapabilities = await hasPreviewEditor();
-    isLocalPreview = previewCapabilities.localEditor === true;
-    await reloadEditorPostData();
-    await syncView();
-  });
   await syncView();
 }
 

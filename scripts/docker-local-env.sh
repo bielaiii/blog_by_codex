@@ -25,12 +25,12 @@ else
 fi
 
 compose_cmd=("${docker_cmd[@]}" compose --project-directory "$BLOG_PROJECT_DIR" -f "$compose_file")
-export BLOG_HTTP_BIND=127.0.0.1 BLOG_LAN_EDITOR=false
+export BLOG_HTTP_BIND=127.0.0.1
 if [[ -f "$project_dir/.local/lan.json" ]]; then
   lan_config=$(python3 -c 'import json,ipaddress,sys; c=json.load(open(sys.argv[1],encoding="utf-8-sig")); print(int(bool(c.get("enabled")))); print(ipaddress.IPv4Address(c.get("bindAddress","127.0.0.1")))' "$project_dir/.local/lan.json")
   mapfile -t lan_values <<< "$lan_config"
   if [[ ${lan_values[0]} == 1 ]]; then
-    export BLOG_HTTP_BIND=${lan_values[1]} BLOG_LAN_EDITOR=true
+    export BLOG_HTTP_BIND=${lan_values[1]}
   fi
 fi
 if [[ -f "$project_dir/.local/remote.json" ]]; then
@@ -46,7 +46,7 @@ fi
 if [[ ${docker_cmd[0]} == docker.exe ]]; then
   # Windows executables only receive WSL environment variables listed in WSLENV.
   # BLOG_PROJECT_DIR already uses Windows path syntax, so do not add /p conversion.
-  for blog_variable in BLOG_PROJECT_DIR BLOG_UID BLOG_GID BLOG_HTTP_BIND BLOG_LAN_EDITOR BLOG_EDITOR_ENABLED BLOG_EDITOR_TOKEN BLOG_SSH_BIND BLOG_SSH_PORT BLOG_PORT BLOG_IMAGE; do
+  for blog_variable in BLOG_PROJECT_DIR BLOG_UID BLOG_GID BLOG_HTTP_BIND BLOG_EDITOR_ENABLED BLOG_SSH_BIND BLOG_SSH_PORT BLOG_PORT BLOG_IMAGE; do
     if [[ :${WSLENV:-}: != *":$blog_variable:"* && :${WSLENV:-}: != *":$blog_variable/"* ]]; then
       export WSLENV="${WSLENV:+$WSLENV:}$blog_variable/w"
     fi

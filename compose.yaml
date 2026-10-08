@@ -19,9 +19,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: "8000"
-      BLOG_LAN_EDITOR: "${BLOG_LAN_EDITOR:-false}"
       BLOG_EDITOR_ENABLED: "${BLOG_EDITOR_ENABLED:-true}"
-      BLOG_EDITOR_TOKEN: "${BLOG_EDITOR_TOKEN:-}"
       GIT_CONFIG_COUNT: "1"
       GIT_CONFIG_KEY_0: safe.directory
       GIT_CONFIG_VALUE_0: /app

@@ -29,7 +29,7 @@ async function startServer(t, root, env = {}) {
   await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
   const port = probe.address().port;
   await new Promise(resolve => probe.close(resolve));
-  const child = spawn(process.execPath, ['preview-server.js'], { cwd: root, env: { ...process.env, PORT: String(port), HOST: '0.0.0.0', BLOG_EDITOR_ENABLED: 'true', BLOG_LAN_EDITOR: 'false', BLOG_EDITOR_TOKEN: 'architecture-test-token-1234567890', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, ['preview-server.js'], { cwd: root, env: { ...process.env, PORT: String(port), HOST: '0.0.0.0', BLOG_EDITOR_ENABLED: 'true', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
   t.after(async () => { if (child.exitCode === null) { child.kill(); await new Promise(resolve => child.once('exit', resolve)); } });
   await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Server start timed out: ${output}`)), 10000);
@@ -210,38 +210,49 @@ test('missing or private resources fail verification and leave no partial public
   await assert.rejects(buildSite(root, output), /symlink escapes|资源不存在/);
 });
 
-test('server enforces read-only, remote unlock, same-origin and version gates', async t => {
+test('LAN clients read drafts and create, update, format and delete without credentials', async t => {
   const root = fixture(t);
-  const { port } = await startServer(t, root, { BLOG_LAN_EDITOR: 'true' });
+  const { port } = await startServer(t, root);
   const config = await request(port, '/api/preview-config', { remote: true });
-  assert.equal(config.value.localEditor, false); assert.equal(config.value.canUnlock, true);
-  for (const route of ['/api/save-post', '/api/delete-post', '/api/format-post']) assert.equal((await request(port, route, { method: 'POST', remote: true, body: { mode: 'create', markdown: source('remote') } })).status, 403);
-  const publicCatalog = await request(port, '/data/catalog.json', { remote: true });
-  assert(!publicCatalog.value.posts.some(post => post.draft));
-  assert.equal((await request(port, '/posts/计算最接近的2次幂.md', { remote: true })).status, 404);
-  assert.equal((await request(port, '/api/editor-session', { method: 'POST', remote: true, body: { token: 'wrong' } })).status, 403);
-  const login = await request(port, '/api/editor-session', { method: 'POST', remote: true, body: { token: 'architecture-test-token-1234567890' } });
-  assert.equal(login.status, 200); const cookie = login.headers['set-cookie'][0].split(';')[0];
-  const created = await request(port, '/api/save-post', { method: 'POST', remote: true, headers: { Cookie: cookie }, body: { mode: 'create', markdown: source('remote') } });
+  assert.deepEqual(config.value, { localEditor: true });
+  assert.equal(config.headers['set-cookie'], undefined);
+  assert.equal(fs.existsSync(path.join(root, '.local/editor-token')), false);
+  const created = await request(port, '/api/save-post', { method: 'POST', remote: true, body: { mode: 'create', markdown: source('remote') } });
   assert.equal(created.status, 200);
-  assert.equal((await request(port, '/api/delete-post', { method: 'POST', remote: true, headers: { Cookie: cookie, Origin: 'https://unrelated.example' }, body: { slug: created.value.slug, version: created.value.version } })).status, 403);
-  assert.equal((await request(port, '/api/delete-post', { method: 'POST', remote: true, headers: { Cookie: cookie }, body: { slug: created.value.slug } })).status, 428);
+  const catalog = await request(port, '/data/catalog.json', { remote: true });
+  assert(catalog.value.posts.some(post => post.slug === created.value.slug && post.draft));
+  assert.equal((await request(port, `/posts/${created.value.slug}.md`, { remote: true })).status, 200);
+  assert.equal((await request(port, `/api/post?slug=${created.value.slug}`, { remote: true })).value.version, created.value.version);
+  const updated = await request(port, '/api/save-post', { method: 'POST', remote: true, body: { mode: 'update', slug: created.value.slug, version: created.value.version, markdown: source('remote updated') } });
+  assert.equal(updated.status, 200);
+  assert.equal((await request(port, '/api/format-post', { method: 'POST', remote: true, body: { markdown: source('remote') } })).status, 200);
+  assert.equal((await request(port, '/api/delete-post', { method: 'POST', remote: true, body: { slug: created.value.slug } })).status, 428);
+  assert.equal((await request(port, '/api/delete-post', { method: 'POST', remote: true, body: { slug: created.value.slug, version: created.value.version } })).status, 409);
+  assert.equal((await request(port, '/api/delete-post', { method: 'POST', remote: true, body: { slug: created.value.slug, version: updated.value.version } })).status, 200);
   assert.equal((await request(port, '/.local/editor-token')).status, 403);
   assert.equal((await request(port, '/scripts/new-post.js')).status, 403);
 });
 
-test('disabled editor blocks all writes including loopback and remote login', async t => {
+test('disabled editor blocks local and LAN writes and hides drafts', async t => {
   const root = fixture(t);
-  const { port } = await startServer(t, root, { BLOG_EDITOR_ENABLED: 'false', BLOG_LAN_EDITOR: 'true' });
-  const config = await request(port, '/api/preview-config'); assert.equal(config.value.localEditor, false); assert.equal(config.value.canUnlock, false);
-  for (const route of ['/api/save-post', '/api/delete-post', '/api/format-post', '/api/editor-session']) assert.equal((await request(port, route, { method: 'POST', body: { token: 'architecture-test-token-1234567890', mode: 'create', markdown: source('blocked') } })).status, 403);
+  const { port } = await startServer(t, root, { BLOG_EDITOR_ENABLED: 'false' });
+  for (const remote of [false, true]) {
+    assert.deepEqual((await request(port, '/api/preview-config', { remote })).value, { localEditor: false });
+    for (const route of ['/api/save-post', '/api/delete-post', '/api/format-post']) assert.equal((await request(port, route, { method: 'POST', remote, body: { mode: 'create', markdown: source('blocked') } })).status, 403);
+    assert(!(await request(port, '/data/catalog.json', { remote })).value.posts.some(post => post.draft));
+    assert.equal((await request(port, '/posts/计算最接近的2次幂.md', { remote })).status, 404);
+  }
 });
 
-test('remote editing flag is enforced even when UI requests are bypassed', async t => {
+test('credential-free editing still rejects cross-site requests and private file access', async t => {
   const root = fixture(t);
   const { port } = await startServer(t, root);
-  assert.equal((await request(port, '/api/preview-config', { remote: true })).value.canUnlock, false);
-  assert.equal((await request(port, '/api/editor-session', { method: 'POST', remote: true, body: { token: 'architecture-test-token-1234567890' } })).status, 403);
-  assert.equal((await request(port, '/api/save-post', { method: 'POST', remote: true, body: { mode: 'create', markdown: source('blocked') } })).status, 403);
-  assert.equal((await request(port, '/api/save-post', { method: 'POST', headers: { Origin: 'https://unrelated.example' }, body: { mode: 'create', markdown: source('blocked') } })).status, 403);
+  for (const remote of [false, true]) {
+    for (const headers of [{ Origin: 'https://unrelated.example' }, { 'Sec-Fetch-Site': 'cross-site' }]) {
+      assert.equal((await request(port, '/api/save-post', { method: 'POST', remote, headers, body: { mode: 'create', markdown: source('blocked') } })).status, 403);
+    }
+    assert.equal((await request(port, '/.git/config', { remote })).status, 403);
+    assert.equal((await request(port, '/api/editor-session', { method: 'POST', remote, body: {} })).status, 404);
+  }
+  assert.equal((await request(port, '/api/preview-config', { headers: { Host: 'unrelated.example' } })).status, 403);
 });
