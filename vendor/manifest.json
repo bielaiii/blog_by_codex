@@ -883,5 +883,35 @@
     "source": "https://cdn.jsdelivr.net/npm/mermaid@10.9.8/dist/mermaid.min.js",
     "sha256": "8d607d7ef1d077a8aa202e18e62212bfa992c68bfeabc5cf45d51a128fe6675d",
     "bytes": 3337857
+  },
+  "shaders/LICENSE": {
+    "source": "https://cdn.jsdelivr.net/npm/shaders@4.0.3/LICENSE",
+    "sha256": "eeaaa26f5c65cb6dfebf1c098ac2375fdcdb497cebf105b0542f229482b106f4",
+    "bytes": 1076
+  },
+  "shaders/licenses/tinyest-LICENSE": {
+    "source": "https://cdn.jsdelivr.net/npm/tinyest@0.3.4/LICENSE",
+    "sha256": "abfe140e29a001c90ded00cf8a8f418cf3f35cb6252c148c7dd4406fa07e2337",
+    "bytes": 1089
+  },
+  "shaders/licenses/tsover-runtime-LICENSE": {
+    "source": "https://cdn.jsdelivr.net/npm/tsover-runtime@0.0.7/LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "bytes": 11358
+  },
+  "shaders/licenses/typed-binary-LICENSE": {
+    "source": "https://cdn.jsdelivr.net/npm/typed-binary@4.3.3/LICENSE",
+    "sha256": "17fd2977635e3561f3ed368c7bb6829bfdaf5962c4859d799d1592ce53dd0c52",
+    "bytes": 1066
+  },
+  "shaders/licenses/typegpu-LICENSE": {
+    "source": "https://cdn.jsdelivr.net/npm/typegpu@0.12.3/LICENSE",
+    "sha256": "abfe140e29a001c90ded00cf8a8f418cf3f35cb6252c148c7dd4406fa07e2337",
+    "bytes": 1089
+  },
+  "shaders/shaders-4.0.3.js": {
+    "source": "https://cdn.jsdelivr.net/npm/shaders@4.0.3/dist/js/bundle.js",
+    "sha256": "12198918d9da104752aed35d6da1614a0dbbf7634223ab925a2d5edcb476e271",
+    "bytes": 2558437
   }
 }

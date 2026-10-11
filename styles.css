@@ -1153,7 +1153,6 @@ html[data-theme="dark"] .article-search-hit.is-fading {
 
 .welcome-view {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
   align-content: center;
   min-height: 620px;
 }
@@ -3159,7 +3158,7 @@ body.is-resizing-editor {
   }
 
   .skill-diamond {
-    width: min(360px, 100%);
+    width: min(360px, 92vw);
     height: 360px;
   }
 

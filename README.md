@@ -159,11 +159,13 @@ node scripts/check-site.js
 回归检查：
 
 ```bash
-node --test tests/architecture.test.mjs
+node --test tests/*.test.mjs
 node scripts/check-browser-suite.mjs
 ```
 
 浏览器检查需要 Chromium/Chrome：自动发现 Playwright 缓存中的 Chromium，或设置 `CHROME_PATH`。检查使用临时项目副本，覆盖直接编辑、口令解锁和 GitHub Pages 子路径下的静态阅读。
+
+整个站点使用 [Shaders FlowingGradient](https://shaders.com/docs/components/flowinggradient) 绘制固定全屏的白底、蓝色光晕渐变，柔化流动纹理，透过半透明面板显露背景。鼠标悬浮顶部 tab 时，蓝色平滑加深，流动与模糊增强；移开后缓慢恢复。深色主题使用对应的深蓝配色。`modules/background-gradient.js` 在启动时按需加载本地 `vendor/shaders/shaders-4.0.3.js`，禁用库的遥测；首页、归档和文章共用一个实例，页面隐藏时暂停动画，离开站点时释放实例。不支持 WebGPU、GPU 初始化失败或启用“减少动态效果”时显示静态 CSS 光晕渐变。GPU 丢失时暂时显示 CSS 背景，由库尝试恢复；恢复成功后同步当前主题和悬浮状态。加载、首帧或恢复在前台等待超过 10 秒，以及不可恢复的运行错误，都会清理实例、canvas、计时器和动画回调，并在本次页面生命周期内保持降级。性能监测使用前台页面的动画帧节奏（并非 GPU 独立计时）：跳过启动或恢复前台后的 3 秒预热，连续三个 2 秒窗口低于 24fps 时降级；后台时间不参与判断。依赖与许可证已随站点保存，可通过 `python3 scripts/vendor-assets.py` 更新，无需在部署时安装 npm 依赖。
 
 ## 行内背景高亮
 

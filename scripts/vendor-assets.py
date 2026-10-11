@@ -9,6 +9,12 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = {
+    "shaders/shaders-4.0.3.js": "https://cdn.jsdelivr.net/npm/shaders@4.0.3/dist/js/bundle.js",
+    "shaders/LICENSE": "https://cdn.jsdelivr.net/npm/shaders@4.0.3/LICENSE",
+    "shaders/licenses/typegpu-LICENSE": "https://cdn.jsdelivr.net/npm/typegpu@0.12.3/LICENSE",
+    "shaders/licenses/tinyest-LICENSE": "https://cdn.jsdelivr.net/npm/tinyest@0.3.4/LICENSE",
+    "shaders/licenses/typed-binary-LICENSE": "https://cdn.jsdelivr.net/npm/typed-binary@4.3.3/LICENSE",
+    "shaders/licenses/tsover-runtime-LICENSE": "https://cdn.jsdelivr.net/npm/tsover-runtime@0.0.7/LICENSE",
     "marked/marked.min.js": "https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js",
     "marked/LICENSE.md": "https://cdn.jsdelivr.net/npm/marked@15.0.12/LICENSE.md",
     "highlightjs/highlight.min.js": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js",

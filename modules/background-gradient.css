@@ -1,0 +1,104 @@
+body {
+  isolation: isolate;
+  --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.78));
+  --content-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.76));
+}
+
+.background-gradient {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(13, 107, 255, 0.24), transparent 54%),
+    radial-gradient(ellipse at 86% 76%, rgba(13, 107, 255, 0.2), transparent 56%),
+    #ffffff;
+}
+
+.background-gradient::before,
+.background-gradient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.background-gradient::before {
+  background:
+    radial-gradient(ellipse at 22% 34%, rgba(6, 77, 204, 0.26), transparent 68%),
+    radial-gradient(ellipse at 79% 66%, rgba(13, 107, 255, 0.22), transparent 70%);
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+
+.background-gradient::after {
+  background: rgba(255, 255, 255, 0.22);
+  transition: background 800ms ease;
+}
+
+.background-gradient.is-emphasized::before {
+  opacity: 1;
+}
+
+.background-gradient.is-emphasized::after {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.background-gradient canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: blur(clamp(80px, 9vw, 140px));
+  transform: scale(1.28);
+  opacity: 0;
+  transition: opacity 1000ms ease, filter 800ms ease;
+}
+
+.background-gradient[data-state="ready"] canvas {
+  opacity: 0.85;
+}
+
+.background-gradient.is-emphasized canvas {
+  filter: blur(clamp(100px, 11vw, 170px)) saturate(1.12);
+}
+
+html[data-theme="dark"] body {
+  --panel-bg: linear-gradient(180deg, rgba(18, 29, 49, 0.9), rgba(13, 23, 39, 0.84));
+  --content-bg: linear-gradient(180deg, rgba(17, 29, 49, 0.9), rgba(13, 23, 39, 0.84));
+}
+
+html[data-theme="dark"] .background-gradient {
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(70, 135, 255, 0.24), transparent 54%),
+    radial-gradient(ellipse at 86% 76%, rgba(70, 135, 255, 0.2), transparent 56%),
+    #111d31;
+}
+
+html[data-theme="dark"] .background-gradient::after {
+  background: rgba(8, 17, 31, 0.18);
+}
+
+html[data-theme="dark"] .background-gradient.is-emphasized::after {
+  background: rgba(8, 17, 31, 0.06);
+}
+
+.welcome-view {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.welcome-view .skill-diamond {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background-gradient::before,
+  .background-gradient::after {
+    transition: none;
+  }
+
+  .background-gradient canvas {
+    display: none;
+    transition: none;
+  }
+}

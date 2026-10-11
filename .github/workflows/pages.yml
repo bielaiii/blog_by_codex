@@ -33,7 +33,7 @@ jobs:
           node-version: '22'
 
       - name: Check content architecture
-        run: node --test tests/architecture.test.mjs
+        run: node --test tests/*.test.mjs
 
       - name: Generate content catalog
         run: |

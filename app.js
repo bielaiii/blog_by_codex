@@ -8,6 +8,7 @@ import { createAppState } from "./modules/state.js";
 import { createRouter } from "./modules/router.js";
 import { createArchiveView } from "./modules/archive-view.js";
 import { createWelcomeView } from "./modules/welcome-view.js";
+import { createBackgroundGradient } from "./modules/background-gradient.js?v=20261010-1";
 import { createTocView } from "./modules/toc-view.js";
 
 const state = createAppState(tabs);
@@ -58,6 +59,7 @@ let timelineScrollFrame = 0;
 
 const tabsEls = [...document.querySelectorAll(".tab")];
 const welcomeViewEl = document.querySelector("#welcome-view");
+const backgroundGradient = createBackgroundGradient(document.querySelector("#background-gradient"));
 const skillDiamondEl = document.querySelector("#skill-diamond");
 const activityGridEl = document.querySelector("#activity-grid");
 const activitySummaryEl = document.querySelector("#activity-summary");
@@ -128,6 +130,7 @@ function applyTheme(theme, shouldStore = false) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   updateThemeToggle(theme);
+  backgroundGradient.updateTheme();
 
   if (shouldStore) {
     setStoredTheme(theme);
@@ -842,6 +845,10 @@ async function syncView() {
 }
 
 tabsEls.forEach((tabEl) => {
+  tabEl.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "touch") backgroundGradient.setEmphasis(true);
+  });
+  tabEl.addEventListener("pointerleave", () => backgroundGradient.setEmphasis(false));
   tabEl.addEventListener("click", () => {
     collapseTopbar();
 
@@ -989,6 +996,7 @@ window.addEventListener("wheel", handleTopEdgeScroll, { passive: true });
 
 async function bootstrap() {
   initializeTheme();
+  backgroundGradient.mount();
   await initializeSiteConfig();
   await syncView();
 }

@@ -107,12 +107,33 @@ try {
   await send('Runtime.enable');
   await send('Page.enable');
   await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   await send('Page.navigate', { url: baseUrl });
   await waitFor("document.querySelector('#skill-diamond')?.children.length > 0 && document.querySelector('#activity-grid')?.children.length > 0", 'home initialization');
+  assert.equal(await evaluate("document.querySelector('#background-gradient').dataset.state"), 'static');
+  assert.equal(await evaluate("document.querySelector('#background-gradient').children.length"), 0);
+  assert.match(await evaluate("getComputedStyle(document.querySelector('#background-gradient')).backgroundImage"), /radial-gradient/);
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
+  await waitFor("['ready','fallback'].includes(document.querySelector('#background-gradient').dataset.state)", 'GPU initialization or CSS fallback');
+  if (await evaluate("document.querySelector('#background-gradient').dataset.state === 'fallback'")) {
+    assert.equal(await evaluate("document.querySelector('#background-gradient').children.length"), 0, 'failed GPU instances must remove their canvas');
+  }
+  // Reload with no WebGPU API, then exercise the rest of the site on its CSS fallback.
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: "Object.defineProperty(navigator, 'gpu', { get: () => undefined, configurable: true });" });
+  await send('Page.reload', { ignoreCache: true });
+  await waitFor("document.querySelector('#background-gradient')?.dataset.reason === 'webgpu-unavailable' && document.querySelector('#skill-diamond')?.children.length > 0 && document.querySelector('#activity-grid')?.children.length > 0", 'site without WebGPU');
+  assert.equal(await evaluate("document.querySelector('#background-gradient').children.length"), 0);
   assert.equal(await evaluate("!!document.querySelector('.editor-access, .editor-access-trigger, input[type=password]')"), false, 'editing must not require a password');
   const initialTheme = await evaluate('document.documentElement.dataset.theme');
   await evaluate("document.querySelector('#theme-toggle').click()");
   assert.notEqual(await evaluate('document.documentElement.dataset.theme'), initialTheme);
+  assert.match(await evaluate("getComputedStyle(document.querySelector('#background-gradient')).backgroundImage"), /radial-gradient/);
+  const fallbackColor = await evaluate("getComputedStyle(document.querySelector('#background-gradient')).backgroundColor");
+  assert.equal(fallbackColor, await evaluate("document.documentElement.dataset.theme === 'dark' ? 'rgb(17, 29, 49)' : 'rgb(255, 255, 255)'"));
+  await evaluate("document.querySelector('[data-tab=articles]').dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }))");
+  assert.equal(await evaluate("document.querySelector('#background-gradient').classList.contains('is-emphasized')"), true);
+  await evaluate("document.querySelector('[data-tab=articles]').dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }))");
+  assert.equal(await evaluate("document.querySelector('#background-gradient').classList.contains('is-emphasized')"), false);
   await evaluate("document.querySelector('[data-tab=articles]').click()");
   await waitFor("!document.querySelector('#article-list-view').hidden && document.querySelectorAll('#article-list .archive-card').length > 0", 'article archive');
   await evaluate("document.querySelector('#article-list .archive-card').click()");
